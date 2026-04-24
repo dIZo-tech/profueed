@@ -535,7 +535,9 @@ function updateBadges() {
 }
 
 async function dbSave(fileData, fileBlob) {
-    const base = fileData.name.replace(/;/g, '-');
+    const base = fileData.name
+    .replace(/;/g, '-')
+    .replace(/\s{2,}/g, ' ');
     const uniqueName = `${Date.now()}-${base}`;
     const filePath = `uploads/${uniqueName}`;
 
