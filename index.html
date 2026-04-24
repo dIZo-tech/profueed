@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StudyDrive — Mon Drive Personnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  /* ─── Reset & Base ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #0E0F13;
+    --surface:   #16181F;
+    --surface2:  #1E2028;
+    --surface3:  #252830;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.12);
+    --text:      #E8EAF0;
+    --muted:     #6B7280;
+    --accent:    #818CF8;
+    --accent-l:  rgba(129,140,248,0.12);
+    --accent-h:  #6366F1;
+    --blue:      #60A5FA;
+    --red:       #F87171;
+    --green:     #34D399;
+    --amber:     #FBBF24;
+    --r:         10px;
+    --r-lg:      16px;
+    --shadow:    0 2px 8px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+    --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+    /* Glow colors per category */
+    --glow-pdf:    rgba(248, 113, 113, 0.35);
+    --glow-video:  rgba(167, 139, 250, 0.35);
+    --glow-image:  rgba(52, 211, 153, 0.35);
+    --glow-audio:  rgba(251, 191, 36, 0.35);
+    --glow-doc:    rgba(96, 165, 250, 0.35);
+    --glow-other:  rgba(129,140,248, 0.25);
+    --glow-folder: rgba(129,140,248, 0.30);
+  }
+  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  /* ─── Layout ───────────────────────────────────────────────────── */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ─── Sidebar ──────────────────────────────────────────────────── */
+  .sidebar {
+    width: 240px; min-width: 240px; background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 0; overflow: hidden;
+    box-shadow: 1px 0 0 var(--border);
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 18px; height: 18px; fill: white; }
+  .logo-text { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .logo-text span { color: var(--accent); }
+
+  .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+  .nav-section-title {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--muted); padding: 8px 10px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    color: var(--muted); font-size: 13px; font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface3); color: var(--text); }
+  .nav-item.active { background: var(--accent-l); color: var(--accent); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto; background: var(--surface2); color: var(--muted);
+    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 20px;
+  }
+  .nav-item.active .nav-badge { background: var(--accent); color: white; }
+
+  .sidebar-footer { padding: 12px 10px; border-top: 1px solid var(--border); }
+  .storage-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .storage-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .storage-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--blue)); border-radius: 99px; transition: width 0.4s ease; }
+
+  /* ─── Main ─────────────────────────────────────────────────────── */
+  .main { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  height: 100vh;   /* On force la hauteur de l'écran */
+  overflow: hidden; /* On empêche tout le site de bouger */
+}
+
+  /* ─── Topbar ───────────────────────────────────────────────────── */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 24px; display: flex; align-items: center; gap: 16px;
+  }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+  .breadcrumb-item {
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    cursor: pointer; white-space: nowrap;
+    transition: color var(--transition);
+  }
+  .breadcrumb-item:hover { color: var(--accent); }
+  .breadcrumb-item.current { color: var(--text); cursor: default; }
+  .breadcrumb-sep { color: var(--border); font-size: 16px; }
+
+  .search-wrap { position: relative; width: 260px; flex-shrink: 0; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--muted); }
+  #searchInput {
+    width: 100%; padding: 8px 10px 8px 32px;
+    border: 1px solid var(--border2); border-radius: 8px;
+    background: var(--surface2); font-family: inherit; font-size: 13px;
+    color: var(--text); outline: none;
+    transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  }
+  #searchInput:focus { border-color: var(--accent); background: var(--surface3); box-shadow: 0 0 0 3px rgba(129,140,248,0.15); }
+  #searchInput::placeholder { color: var(--muted); }
+
+  .view-toggle { display: flex; gap: 2px; background: var(--surface2); padding: 3px; border-radius: 8px; }
+  .view-btn {
+    width: 28px; height: 28px; border: none; border-radius: 6px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; color: var(--muted);
+    transition: background var(--transition), color var(--transition);
+  }
+  .view-btn.active { background: var(--surface3); color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+  .view-btn svg { width: 14px; height: 14px; }
+
+  /* ─── Content ──────────────────────────────────────────────────── */
+  .content { 
+  flex: 1; 
+  overflow-y: auto; /* C'EST CETTE LIGNE QUI CRÉE LE SCROLL AUTOMATIQUE */
+  padding: 24px; 
+}
+
+  /* ─── Drop Zone ────────────────────────────────────────────────── */
+  .drop-zone {
+    border: 2px dashed var(--border2); border-radius: var(--r-lg);
+    padding: 40px 24px; text-align: center; margin-bottom: 24px;
+    background: var(--surface); cursor: pointer;
+    transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent); background: var(--accent-l);
+    box-shadow: 0 0 32px rgba(129,140,248,0.15);
+  }
+  .drop-zone-icon { font-size: 32px; margin-bottom: 12px; }
+  .drop-zone h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .drop-zone p { font-size: 13px; color: var(--muted); }
+  .drop-zone-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .btn-upload {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: white; border: none;
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    cursor: pointer; margin-top: 14px;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    font-family: inherit;
+  }
+  .btn-upload:hover { background: var(--accent-h); transform: translateY(-1px); box-shadow: 0 0 20px rgba(129,140,248,0.4); }
+  .btn-upload svg { width: 14px; height: 14px; }
+
+  /* ─── Section Titles ───────────────────────────────────────────── */
+  .section-title {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted);
+    margin: 0 0 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-count { background: var(--surface2); color: var(--muted); font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+  .section-wrap { margin-bottom: 28px; }
+
+  /* ─── Grid View ────────────────────────────────────────────────── */
+  .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+
+  .file-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 16px 14px 14px;
+    cursor: pointer; position: relative;
+    transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+    display: flex; flex-direction: column; gap: 10px;
+    user-select: none;
+  }
+  .file-card:hover { transform: translateY(-3px); }
+
+  /* Glow effects per category on hover */
+  .file-card[data-cat="pdf"]:hover    { box-shadow: 0 0 0 1px rgba(248,113,113,0.4), 0 8px 32px var(--glow-pdf);    border-color: rgba(248,113,113,0.5); }
+  .file-card[data-cat="video"]:hover  { box-shadow: 0 0 0 1px rgba(167,139,250,0.4), 0 8px 32px var(--glow-video);  border-color: rgba(167,139,250,0.5); }
+  .file-card[data-cat="image"]:hover  { box-shadow: 0 0 0 1px rgba(52,211,153,0.4),  0 8px 32px var(--glow-image);  border-color: rgba(52,211,153,0.5); }
+  .file-card[data-cat="audio"]:hover  { box-shadow: 0 0 0 1px rgba(251,191,36,0.4),  0 8px 32px var(--glow-audio);  border-color: rgba(251,191,36,0.5); }
+  .file-card[data-cat="doc"]:hover    { box-shadow: 0 0 0 1px rgba(96,165,250,0.4),  0 8px 32px var(--glow-doc);    border-color: rgba(96,165,250,0.5); }
+  .file-card[data-cat="other"]:hover  { box-shadow: 0 0 0 1px rgba(129,140,248,0.3), 0 8px 32px var(--glow-other);  border-color: rgba(129,140,248,0.4); }
+  .file-card.folder:hover             { box-shadow: 0 0 0 1px rgba(129,140,248,0.4), 0 8px 32px var(--glow-folder); border-color: rgba(129,140,248,0.6); }
+
+  .file-card .card-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .file-card .card-name { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.4; word-break: break-all; }
+  .file-card .card-meta { font-size: 11px; color: var(--muted); margin-top: auto; }
+  .file-card .card-actions {
+    position: absolute; top: 8px; right: 8px;
+    opacity: 0; transition: opacity var(--transition);
+    display: flex; gap: 4px;
+  }
+  .file-card:hover .card-actions { opacity: 1; }
+  .action-btn {
+    width: 26px; height: 26px; border-radius: 6px; border: none;
+    background: var(--surface3); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+  }
+  .action-btn:hover { background: var(--border2); }
+  .action-btn svg { width: 13px; height: 13px; color: var(--muted); }
+  .action-btn.danger:hover { background: rgba(248,113,113,0.15); }
+  .action-btn.danger:hover svg { color: var(--red); }
+
+  /* folder card */
+  .file-card.folder { background: rgba(129,140,248,0.07); border-color: rgba(129,140,248,0.2); }
+
+  /* ─── List View ────────────────────────────────────────────────── */
+  .file-list { display: flex; flex-direction: column; gap: 2px; }
+  .file-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent;
+    transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    user-select: none;
+  }
+  .file-row[data-cat="pdf"]:hover    { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.25); box-shadow: 0 0 16px var(--glow-pdf); }
+  .file-row[data-cat="video"]:hover  { background: rgba(167,139,250,0.06); border-color: rgba(167,139,250,0.25); box-shadow: 0 0 16px var(--glow-video); }
+  .file-row[data-cat="image"]:hover  { background: rgba(52,211,153,0.06);  border-color: rgba(52,211,153,0.25);  box-shadow: 0 0 16px var(--glow-image); }
+  .file-row[data-cat="audio"]:hover  { background: rgba(251,191,36,0.06);  border-color: rgba(251,191,36,0.25);  box-shadow: 0 0 16px var(--glow-audio); }
+  .file-row[data-cat="doc"]:hover    { background: rgba(96,165,250,0.06);  border-color: rgba(96,165,250,0.25);  box-shadow: 0 0 16px var(--glow-doc); }
+  .file-row[data-cat="other"]:hover  { background: var(--surface2); border-color: var(--border2); box-shadow: var(--shadow); }
+  .file-row[data-cat="folder"]:hover { background: rgba(129,140,248,0.07); border-color: rgba(129,140,248,0.3); box-shadow: 0 0 16px var(--glow-folder); }
+  .file-row .row-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .file-row .row-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-row .row-type { width: 80px; font-size: 12px; color: var(--muted); }
+  .file-row .row-size { width: 80px; font-size: 12px; color: var(--muted); text-align: right; }
+  .file-row .row-actions { display: flex; gap: 4px; opacity: 0; transition: opacity var(--transition); }
+  .file-row:hover .row-actions { opacity: 1; }
+
+  /* ─── Icon Colors ──────────────────────────────────────────────── */
+  .icon-pdf    { background: rgba(248,113,113,0.15); color: #F87171; }
+  .icon-video  { background: rgba(167,139,250,0.15); color: #A78BFA; }
+  .icon-image  { background: rgba(52,211,153,0.15);  color: #34D399; }
+  .icon-doc    { background: rgba(96,165,250,0.15);  color: #60A5FA; }
+  .icon-other  { background: var(--surface3);        color: var(--muted); }
+  .icon-folder { background: rgba(129,140,248,0.18); color: var(--accent); }
+  .icon-audio  { background: rgba(251,191,36,0.15);  color: #FBBF24; }
+
+  /* ─── Empty State ──────────────────────────────────────────────── */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state svg { width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3; }
+  .empty-state p { font-size: 13px; }
+
+  /* ─── Modal Overlay ────────────────────────────────────────────── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.70);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--surface); border-radius: var(--r-lg);
+    border: 1px solid var(--border2);
+    width: 90vw; max-width: 860px; max-height: 90vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.80);
+    transform: scale(0.96); transition: transform 0.2s ease;
+    overflow: hidden;
+  }
+  .overlay.open .modal { transform: scale(1); }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    background: var(--surface3); cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    transition: background var(--transition);
+    color: var(--muted);
+  }
+  .modal-close:hover { background: var(--border2); color: var(--text); }
+  .modal-body { flex: 1; overflow: auto; padding: 0; }
+  #pdfViewer { width: 100%; height: 70vh; border: none; }
+  #imgViewer { display: block; max-width: 100%; max-height: 70vh; margin: auto; object-fit: contain; padding: 16px; }
+
+  /* ─── Toast ────────────────────────────────────────────────────── */
+  #toastContainer { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; }
+  .toast {
+    background: var(--surface3); color: var(--text); padding: 10px 16px;
+    border: 1px solid var(--border2);
+    border-radius: 8px; font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-lg); animation: slideUp 0.25s ease forwards;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.success { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.3); color: #34D399; }
+  .toast.error   { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.3); color: #F87171; }
+  @keyframes slideUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ─── Progress Bar ─────────────────────────────────────────────── */
+  #uploadProgress {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent); z-index: 3000;
+    transform-origin: left; transform: scaleX(0);
+    transition: transform 0.3s ease, opacity 0.3s;
+  }
+
+  /* ─── Scrollbar ────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+  /* ─── Responsive ───────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .search-wrap { width: 180px; }
+    .file-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .content { padding: 16px; }
+    .topbar { padding: 10px 16px; }
+  }
+
+  /* ─── Misc ─────────────────────────────────────────────────────── */
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 600; padding: 3px 8px;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .tag-pdf    { background: rgba(248,113,113,0.15); color: #F87171; }
+  .tag-video  { background: rgba(167,139,250,0.15); color: #A78BFA; }
+  .tag-image  { background: rgba(52,211,153,0.15);  color: #34D399; }
+  .tag-doc    { background: rgba(96,165,250,0.15);  color: #60A5FA; }
+  .tag-other  { background: var(--surface3);        color: var(--muted); }
+  .tag-audio  { background: rgba(251,191,36,0.15);  color: #FBBF24; }
+
+  /* Stats bar */
+  .stats-bar { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 12px; color: var(--muted);
+  }
+  .stat-pill strong { color: var(--text); font-weight: 600; font-size: 14px; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .file-card.folder:hover .card-actions, .file-row[data-cat="folder"]:hover .row-actions { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="uploadProgress"></div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>
+      </div>
+      <span class="logo-text">Study<span>Drive</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Navigation</div>
+      <div class="nav-item active" data-filter="all" onclick="setFilter('all', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Tout
+        <span class="nav-badge" id="badge-all">0</span>
+      </div>
+      <div class="nav-item" data-filter="pdf" onclick="setFilter('pdf', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        PDF
+        <span class="nav-badge" id="badge-pdf">0</span>
+      </div>
+      <div class="nav-item" data-filter="video" onclick="setFilter('video', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+        Vidéos
+        <span class="nav-badge" id="badge-video">0</span>
+      </div>
+      <div class="nav-item" data-filter="image" onclick="setFilter('image', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Images
+        <span class="nav-badge" id="badge-image">0</span>
+      </div>
+      <div class="nav-item" data-filter="audio" onclick="setFilter('audio', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+        Audio
+        <span class="nav-badge" id="badge-audio">0</span>
+      </div>
+      <div class="nav-item" data-filter="doc" onclick="setFilter('doc', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Documents
+        <span class="nav-badge" id="badge-doc">0</span>
+      </div>
+      <div class="nav-item" data-filter="other" onclick="setFilter('other', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
+        Autres
+        <span class="nav-badge" id="badge-other">0</span>
+      </div>
+
+      <div class="nav-section-title" style="margin-top:16px">Dossiers</div>
+      <div id="folderNav"></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="storage-label">
+        <span>Stockage utilisé</span>
+        <span id="storageText">0 Mo</span>
+      </div>
+      <div class="storage-bar"><div class="storage-fill" id="storageFill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="breadcrumb" id="breadcrumb">
+        <span class="breadcrumb-item current" data-path="">Mon Drive</span>
+      </div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Rechercher un fichier…" oninput="onSearch(this.value)" />
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btn-grid" onclick="setView('grid', this)" title="Grille">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+        <button class="view-btn" id="btn-list" onclick="setView('list', this)" title="Liste">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="drop-zone" id="dropZone">
+    <div class="drop-zone-icon">📁</div>
+    <h3>Glissez vos fichiers ou dossiers ici</h3>
+    <p>Supports PDF, vidéos, images, documents et plus</p>
+    
+    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px;">
+        <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Fichiers
+        </button>
+
+        <button class="btn-upload" onclick="document.getElementById('folderInput').click()" style="background: var(--accent-color); border-color: var(--accent-color);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            Dossier
+        </button>
+    </div>
+
+    <input type="file" id="fileInput" multiple hidden onchange="processFiles(this.files)">
+    <input type="file" id="folderInput" webkitdirectory hidden onchange="processFiles(this.files)">
+</div>
+
+      <!-- Stats bar -->
+      <div class="stats-bar" id="statsBar" style="display:none"></div>
+
+      <!-- File sections -->
+      <div id="fileArea"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Preview Modal -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Aperçu</span>
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+    StudyDrive — Core JS (Version Cloud Supabase)
+═══════════════════════════════════════════════════════════════════ */
+
+const SUPABASE_URL = "https://hisjvmqmrjqrcooltqgu.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc2p2bXFtcmpxcmNvb2x0cWd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njg5NzksImV4cCI6MjA5MjU0NDk3OX0.saBpqB5mltTE_OJ5eruoP4tTP4H-Isw5donBGJm_hbY";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allFiles = []; 
+let currentPath  = '';
+let currentFilter= 'all';
+let currentView  = 'grid';
+let searchQuery  = '';
+
+/* ─── Supabase Engine ───────────────────────────────────────────── */
+/* ─── Moteur Supabase ───────────────────────────────────────────── */
+async function dbGetAll() {
+    const { data, error } = await supabaseClient
+        .from('Documents')
+        .select('*')
+        .order('created_at', { ascending: false });
+    if (error) { console.error("Erreur lecture:", error); return []; }
+    return data || [];
+}
+
+/* ─── Compteurs (Badges) ────────────────────────────────────────── */
+function updateBadges() {
+    const cats = ['all', 'pdf', 'video', 'image', 'audio', 'doc', 'other'];
+    cats.forEach(c => {
+        const el = document.getElementById(`badge-${c}`);
+        if (el) {
+            const count = (c === 'all') 
+                ? allFiles.length 
+                : allFiles.filter(f => f.category === c).length;
+            el.textContent = count;
+        }
+    });
+}
+
+async function dbSave(fileData, fileBlob) {
+    const uniqueName = `${Date.now()}-${fileData.name}`;
+    const filePath = `uploads/${uniqueName}`;
+
+    // 1. Upload vers Storage Bucket "SAC"
+    // Ajout de upsert:false et contentType pour que le fichier s'ouvre bien dans le navigateur
+    const { error: storageError } = await supabaseClient.storage
+        .from('SAC')
+        .upload(filePath, fileBlob, {
+            contentType: fileData.type, 
+            upsert: false
+        });
+
+    if (storageError) {
+        console.error("Erreur Storage:", storageError);
+        throw storageError;
+    }
+
+    // 2. Récupération URL publique
+    const { data: urlData } = supabaseClient.storage
+        .from('SAC')
+        .getPublicUrl(filePath);
+
+    if (!urlData || !urlData.publicUrl) {
+        throw new Error("Impossible de générer l'URL publique");
+    }
+
+    // 3. Insertion SQL dans Table "Documents" (Bien avec un "D" majuscule)
+    const { data, error: dbError } = await supabaseClient
+        .from('Documents') 
+        .insert([{
+            name: fileData.name,
+            size: fileData.size,
+            type: fileData.type,
+            category: fileData.category,
+            path: fileData.path || '',
+            storage_path: filePath,
+            url: urlData.publicUrl
+        }])
+        .select();
+
+    if (dbError) {
+        console.error("Erreur SQL:", dbError);
+        throw dbError;
+    }
+
+    return data[0];
+}
+
+async function dbDelete(id, storagePath) {
+    try {
+        if (storagePath) {
+            // CORRECTION ICI : On retire "SAC/" du début du chemin pour le storage
+            const cleanPath = storagePath.startsWith('SAC/') 
+                ? storagePath.replace('SAC/', '') 
+                : storagePath;
+
+            const { error: storageError } = await supabaseClient.storage
+                .from('SAC')
+                .remove([cleanPath]);
+            
+            if (storageError) {
+                console.error("Erreur suppression Storage:", storageError);
+            }
+        }
+
+        // 2. Suppression dans la table Documents
+        const { error: dbError } = await supabaseClient
+            .from('Documents')
+            .delete()
+            .eq('id', id);
+
+        if (dbError) throw dbError;
+
+        // 3. Mise à jour locale (pour que ça disparaisse de l'écran sans rafraîchir)
+        allFiles = allFiles.filter(f => f.id !== id);
+        render(); // On redessine la liste
+        updateBadges();
+        updateStorage();
+        
+        toast("Supprimé avec succès", "success");
+        return true;
+    } catch (err) {
+        console.error("Erreur dbDelete:", err);
+        toast("Erreur suppression", "error");
+        throw err;
+    }
+}
+
+/* ─── Category Detection ────────────────────────────────────────── */
+function getCategory(name, mime) {
+    const ext = name.split('.').pop().toLowerCase();
+    const pdfExts   = ['pdf'];
+    const videoExts = ['mp4','mkv','avi','mov','webm','m4v','flv','wmv'];
+    const imageExts = ['jpg','jpeg','png','gif','webp','svg','bmp','tiff','avif'];
+    const audioExts = ['mp3','wav','ogg','m4a','flac','aac','wma'];
+    const docExts   = ['doc','docx','ppt','pptx','xls','xlsx','txt','md','odt','csv','rtf','pages','numbers','key'];
+
+    if (pdfExts.includes(ext))   return 'pdf';
+    if (videoExts.includes(ext)) return 'video';
+    if (imageExts.includes(ext)) return 'image';
+    if (audioExts.includes(ext)) return 'audio';
+    if (docExts.includes(ext))   return 'doc';
+    return 'other';
+}
+
+/* ─── Process files ─────────────────────────────────────────────── */
+async function processFiles(fileList) {
+    const files = Array.from(fileList);
+    if (!files.length) return;
+
+    showProgress(true);
+    let done = 0;
+    const total = files.length;
+
+    for (const file of files) {
+        try {
+            // 1. On récupère le chemin relatif (ex: "MonDossier/photo.jpg")
+            const rel = file.webkitRelativePath || file.name;
+            const parts = rel.split('/');
+            const name = parts[parts.length - 1];
+            const path = parts.slice(0, -1).join('/');
+            const category = getCategory(name, file.type);
+
+            // 2. IMPORTANT : On définit le chemin EXACT dans le bucket SAC
+            // Si c'est un fichier seul, ce sera "SAC/photo.jpg"
+            // Si c'est un dossier, ce sera "SAC/MonDossier/photo.jpg"
+            const storagePath = `SAC/${rel}`;
+
+            // 3. On envoie tout ça à dbSave
+            // On ajoute storage_path pour que la suppression sache quoi effacer
+            const newRecord = await dbSave({ 
+                name, 
+                size: file.size, 
+                type: file.type, 
+                category, 
+                path,
+                storage_path: storagePath // <--- LIGNE ESSENTIELLE
+            }, file);
+
+            allFiles.push(newRecord);
+        } catch (err) {
+            console.error('Erreur upload:', file.name, err);
+        }
+        done++;
+        setProgressValue(done / total);
+    }
+
+    showProgress(false);
+    render();
+    updateBadges();
+    updateStorage();
+    toast(`${files.length} fichier(s) traité(s)`, 'success');
+}
+/* ─── UI Actions ────────────────────────────────────────────────── */
+async function deleteFile(id, e) {
+    if (e) e.stopPropagation();
+    const file = allFiles.find(f => f.id === id);
+    if (!file || !confirm(`Supprimer "${file.name}" ?`)) return;
+
+    try {
+        await dbDelete(id, file.storage_path);
+        allFiles = allFiles.filter(f => f.id !== id);
+        render(); updateBadges(); updateStorage();
+        toast("Supprimé", "success");
+    } catch (err) {
+        console.error(err);
+        toast("Erreur suppression", "error");
+    }
+}
+
+async function deleteFolder(folderPath, e) {
+    e && e.stopPropagation();
+    if (!confirm(`Supprimer le dossier "${folderPath}" et tout son contenu ?`)) return;
+    const toDelete = allFiles.filter(f => f.path === folderPath || f.path.startsWith(folderPath + '/'));
+    for (const f of toDelete) {
+        await dbDelete(f.id, f.storage_path);
+    }
+    allFiles = allFiles.filter(f => !toDelete.includes(f));
+    if (currentPath.startsWith(folderPath)) currentPath = '';
+    render(); updateBadges(); updateStorage();
+}
+
+function downloadFile(file, e) {
+    e && e.stopPropagation();
+    const a = document.createElement('a');
+    a.href = file.url;
+    a.download = file.name;
+    a.target = "_blank";
+    a.click();
+}
+
+/* ─── Preview ───────────────────────────────────────────────────── */
+function previewFile(file) {
+    const overlay = document.getElementById('overlay');
+    const body    = document.getElementById('modalBody');
+    document.getElementById('modalTitle').textContent = file.name;
+    body.innerHTML = '';
+
+    if (file.category === 'pdf') {
+        body.innerHTML = `<iframe id="pdfViewer" src="${file.url}"></iframe>`;
+    } else if (file.category === 'image') {
+        body.innerHTML = `<img id="imgViewer" src="${file.url}" alt="${file.name}">`;
+    } else if (file.category === 'video') {
+        body.innerHTML = `<video src="${file.url}" controls style="width:100%;max-height:70vh;"></video>`;
+    } else if (file.category === 'audio') {
+        body.innerHTML = `<div style="padding:40px;text-align:center;"><div style="font-size:48px">🎵</div><p>${escHtml(file.name)}</p><audio src="${file.url}" controls></audio></div>`;
+    } else {
+        body.innerHTML = `<div style="padding:40px;text-align:center;"><div style="font-size:48px">📄</div><p>Aperçu non disponible.</p><button class="btn-upload" onclick="window.open('${file.url}', '_blank')">Ouvrir</button></div>`;
+    }
+    overlay.classList.add('open');
+}
+
+function closeModal(e) {
+    if (e && e.target !== document.getElementById('overlay')) return;
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('modalBody').innerHTML = '';
+}
+
+/* ─── Navigation & Render (Inchangés) ─────────────────────────────── */
+function navigateTo(path) {
+    currentPath = path;
+    searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    renderBreadcrumb();
+    render();
+}
+
+function renderBreadcrumb() {
+    const bc = document.getElementById('breadcrumb');
+    bc.innerHTML = '';
+    const root = document.createElement('span');
+    root.className = 'breadcrumb-item';
+    root.textContent = 'Mon Drive';
+    root.onclick = () => navigateTo('');
+    bc.appendChild(root);
+
+    if (currentPath) {
+        const parts = currentPath.split('/');
+        parts.forEach((part, i) => {
+            const sep = document.createElement('span');
+            sep.className = 'breadcrumb-sep';
+            sep.textContent = '›';
+            bc.appendChild(sep);
+            const item = document.createElement('span');
+            item.className = 'breadcrumb-item' + (i === parts.length - 1 ? ' current' : '');
+            item.textContent = part;
+            if (i < parts.length - 1) {
+                const path = parts.slice(0, i + 1).join('/');
+                item.onclick = () => navigateTo(path);
+            }
+            bc.appendChild(item);
+        });
+    } else { root.className += ' current'; }
+}
+
+function setFilter(filter, el) {
+    currentFilter = filter;
+    currentPath = '';
+    searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    renderBreadcrumb();
+    render();
+}
+
+function setView(view, btn) {
+    currentView = view;
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+}
+
+function onSearch(q) {
+    searchQuery = q.toLowerCase().trim();
+    render();
+}
+
+function getVisibleFiles() {
+    let files = allFiles;
+    if (searchQuery) return files.filter(f => f.name.toLowerCase().includes(searchQuery)).sort((a,b) => naturalSort(a.name, b.name));
+    if (currentFilter !== 'all') return files.filter(f => f.category === currentFilter).sort((a,b) => naturalSort(a.name, b.name));
+    return files.filter(f => f.path === currentPath).sort((a,b) => naturalSort(a.name, b.name));
+}
+
+function getSubfolders() {
+    if (searchQuery || currentFilter !== 'all') return [];
+    const prefix = currentPath ? currentPath + '/' : '';
+    const seen = new Set();
+    const folders = [];
+    for (const f of allFiles) {
+        if (!f.path.startsWith(prefix)) continue;
+        const rest = f.path.slice(prefix.length);
+        if (!rest) continue;
+        const top = rest.split('/')[0];
+        const fullPath = prefix + top;
+        if (!seen.has(fullPath)) {
+            seen.add(fullPath);
+            folders.push({ name: top, path: fullPath });
+        }
+    }
+    return folders.sort((a,b) => naturalSort(a.name, b.name));
+}
+
+function render() {
+    const area = document.getElementById('fileArea');
+    const statsEl = document.getElementById('statsBar');
+    area.innerHTML = '';
+    const files = getVisibleFiles();
+    const folders = getSubfolders();
+
+    if (allFiles.length > 0) {
+        statsEl.style.display = 'flex';
+        const cats = ['pdf','video','image','audio','doc','other'];
+        const labels = { pdf:'PDF', video:'Vidéos', image:'Images', audio:'Audio', doc:'Docs', other:'Autres' };
+        const colors = { pdf:'#EF4444', video:'#8B5CF6', image:'#10B981', audio:'#F59E0B', doc:'#3B82F6', other:'#9CA3AF' };
+        statsEl.innerHTML = cats.map(c => {
+            const n = allFiles.filter(f => f.category === c).length;
+            return n ? `<div class="stat-pill"><div class="stat-dot" style="background:${colors[c]}"></div><strong>${n}</strong> ${labels[c]}</div>` : '';
+        }).join('');
+    } else { statsEl.style.display = 'none'; }
+
+    if (!folders.length && !files.length) {
+        area.innerHTML = `<div class="empty-state"><p>Aucun fichier ici. Glissez-déposez pour commencer !</p></div>`;
+        return;
+    }
+
+    if (folders.length) {
+        const wrap = document.createElement('div');
+        wrap.className = 'section-wrap';
+        wrap.innerHTML = `<div class="section-title">Dossiers <span class="section-count">${folders.length}</span></div>`;
+        const grid = document.createElement('div');
+        grid.className = currentView === 'grid' ? 'file-grid' : 'file-list';
+        folders.forEach(folder => grid.appendChild(currentView === 'grid' ? makeFolderCard(folder) : makeFolderRow(folder)));
+        wrap.appendChild(grid);
+        area.appendChild(wrap);
+    }
+
+    if (files.length) {
+        const wrap = document.createElement('div');
+        wrap.className = 'section-wrap';
+        wrap.innerHTML = `<div class="section-title">Fichiers <span class="section-count">${files.length}</span></div>`;
+        const grid = document.createElement('div');
+        grid.className = currentView === 'grid' ? 'file-grid' : 'file-list';
+        files.forEach(f => grid.appendChild(currentView === 'grid' ? makeFileCard(f) : makeFileRow(f)));
+        wrap.appendChild(grid);
+        area.appendChild(wrap);
+    }
+    renderFolderNav();
+}
+
+/* ─── Builders ──────────────────────────────────────────────────── */
+const ICONS = {
+    pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`,
+    video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>`,
+    image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
+    audio: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>`,
+    doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`,
+    other: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`,
+    folder: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>`,
+};
+
+/* ─── Builders (Version Corrigée pour Supabase) ─────────────────── */
+
+// 1. Pour les fichiers en mode GRILLE
+/* ─── Builders (Version Corrigée pour Supabase) ─────────────────── */
+
+// 1. Pour les fichiers en mode GRILLE
+function makeFileCard(file) {
+    const div = document.createElement('div');
+    div.className = 'file-card';
+    div.innerHTML = `
+        <div class="card-actions">
+            <button class="action-btn" title="Télécharger" onclick="downloadFile(allFiles.find(f=>f.id===${file.id}),event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+            <button class="action-btn danger" title="Supprimer" onclick="deleteFile(${file.id},event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            </button>
+        </div>
+        <div class="card-icon icon-${file.category}">${ICONS[file.category] || ICONS.other}</div>
+        <div class="card-name">${escHtml(file.name)}</div>
+        <div class="card-meta">${formatSize(file.size)}</div>`;
+    div.onclick = () => previewFile(file);
+    return div;
+}
+
+// 2. POUR LES DOSSIERS
+function makeFolderCard(folder) {
+    const div = document.createElement('div');
+    div.className = 'file-card folder';
+    div.innerHTML = `
+        <div class="card-icon icon-folder">${ICONS.folder}</div>
+        <div class="card-name">${escHtml(folder.name)}</div>
+    `;
+    div.onclick = () => navigateTo(folder.path);
+    return div;
+}
+
+// 3. Pour les fichiers en mode LISTE
+function makeFileRow(file) {
+    const div = document.createElement('div');
+    div.className = 'file-row';
+    div.innerHTML = `
+        <div class="row-icon icon-${file.category}">${ICONS[file.category] || ICONS.other}</div>
+        <div class="row-name">${escHtml(file.name)}</div>
+        <div class="row-size">${formatSize(file.size)}</div>
+        <div class="row-actions">
+            <button class="action-btn" onclick="downloadFile(allFiles.find(f=>f.id===${file.id}),event)">📥</button>
+            <button class="action-btn danger" onclick="deleteFile(${file.id},event)">🗑️</button>
+        </div>`;
+    div.onclick = () => previewFile(file);
+    return div;
+}
+
+// 4. Pour les dossiers en mode LISTE
+function makeFolderRow(folder) {
+    const div = document.createElement('div');
+    div.className = 'file-row';
+    div.innerHTML = `
+        <div class="row-icon icon-folder">${ICONS.folder}</div>
+        <div class="row-name">${escHtml(folder.name)}</div>
+    `;
+    div.onclick = () => navigateTo(folder.path);
+    return div;
+}
+
+function renderFolderNav() {
+    const nav = document.getElementById('folderNav');
+    nav.innerHTML = '';
+    const topFolders = [...new Set(allFiles.map(f => f.path.split('/')[0]).filter(Boolean))];
+    topFolders.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'nav-item' + (currentPath === name ? ' active' : '');
+        item.innerHTML = `${ICONS.folder}<span>${escHtml(name)}</span>`;
+        item.onclick = () => navigateTo(name);
+        nav.appendChild(item);
+    });
+}
+
+function updateStorage() {
+    const total = allFiles.reduce((s, f) => s + f.size, 0);
+    document.getElementById('storageText').textContent = formatSize(total);
+    document.getElementById('storageFill').style.width = Math.min(100, (total / (500*1024*1024)) * 100) + '%';
+}
+
+/* ─── Helpers ───────────────────────────────────────────────────── */
+function naturalSort(a, b) { return new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' }).compare(a, b); }
+function formatSize(b) { if (b < 1024) return b + ' o'; if (b < 1048576) return (b/1024).toFixed(1) + ' Ko'; return (b/1048576).toFixed(1) + ' Mo'; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(m, t) { console.log(`Toast: ${m}`); } // Tu peux remettre ton système de toast ici
+function showProgress(v) { document.getElementById('uploadProgress').style.opacity = v ? '1' : '0'; }
+function setProgressValue(v) { document.getElementById('uploadProgress').style.transform = `scaleX(${v})`; }
+
+/* ─── Drag & Drop ───────────────────────────────────────────────── */
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', async e => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    await processFiles(files);
+});
+
+/* ─── Init ──────────────────────────────────────────────────────── */
+// Remplace ton ancien bloc init par celui-ci tout en bas :
+// Remplace ton ancien bloc init par celui-ci tout en bas :
+async function init() {
+    try {
+        // On récupère les données
+        const { data, error } = await supabaseClient.from('Documents').select('*');
+        if (error) throw error;
+        allFiles = data || [];
+
+        // On lance l'affichage
+        render();
+        
+        // On met à jour les badges (on vérifie si la fonction existe)
+        if (typeof updateBadges === 'function') {
+            updateBadges();
+        }
+        
+        renderBreadcrumb();
+        console.log("Initialisation réussie !");
+    } catch (err) {
+        console.error("Erreur Init:", err);
+    }
+}
+
+// On lance enfin la machine
+init();
+</script>
+</body>
+</html>
