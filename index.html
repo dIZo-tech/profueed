@@ -583,59 +583,43 @@ async function dbSave(fileData, fileBlob) {
     return data[0];
 }
 
-async function dbDelete(id, storagePath, isFolder = false, folderName = '') {
-    const confirmation = isFolder 
-        ? `Supprimer le dossier "${folderName}" et TOUT son contenu ?` 
-        : "Supprimer ce fichier ?";
-        
-    if (!confirm(confirmation)) return;
-
+async function dbDelete(id, storagePath) {
     try {
-        if (isFolder) {
-            // 1. Définir le chemin cible du dossier
-            const targetPath = currentPath ? currentPath + '/' + folderName : folderName;
+        if (storagePath) {
+            // CORRECTION ICI : On retire "SAC/" du début du chemin pour le storage
+            const cleanPath = storagePath.startsWith('SAC/') 
+                ? storagePath.replace('SAC/', '') 
+                : storagePath;
+
+            const { error: storageError } = await supabaseClient.storage
+                .from('SAC')
+                .remove([cleanPath]);
             
-            // 2. Trouver TOUS les fichiers qui sont dans ce dossier ou ses sous-dossiers
-            const toDelete = allFiles.filter(f => 
-                f.path === targetPath || f.path.startsWith(targetPath + '/')
-            );
-
-            if (toDelete.length > 0) {
-                // 3. BULK DELETE STORAGE : On envoie la liste de tous les storage_path d'un coup
-                const storagePaths = toDelete.map(f => f.storage_path);
-                const { error: storageErr } = await supabaseClient.storage
-                    .from('SAC')
-                    .remove(storagePaths);
-                if (storageErr) throw storageErr;
-
-                // 4. BULK DELETE DATABASE : On supprime toutes les lignes dont le path commence par targetPath
-                // On utilise la commande .or() ou .like() pour viser large
-                const { error: dbErr } = await supabaseClient
-                    .from('Documents')
-                    .delete()
-                    .or(`path.eq.${targetPath},path.ilike.${targetPath}/%`);
-                
-                if (dbErr) throw dbErr;
+            if (storageError) {
+                console.error("Erreur suppression Storage:", storageError);
             }
-            
-            // 5. Supprimer aussi l'entrée du dossier lui-même si elle existe
-            await supabaseClient.from('Documents').delete().eq('id', id);
-
-        } else {
-            // Suppression classique pour un fichier seul
-            if (storagePath) {
-                await supabaseClient.storage.from('SAC').remove([storagePath]);
-            }
-            await supabaseClient.from('Documents').delete().eq('id', id);
         }
 
-        // Rafraîchir l'affichage
-        await init();
-        console.log("Suppression massive réussie");
+        // 2. Suppression dans la table Documents
+        const { error: dbError } = await supabaseClient
+            .from('Documents')
+            .delete()
+            .eq('id', id);
 
+        if (dbError) throw dbError;
+
+        // 3. Mise à jour locale (pour que ça disparaisse de l'écran sans rafraîchir)
+        allFiles = allFiles.filter(f => f.id !== id);
+        render(); // On redessine la liste
+        updateBadges();
+        updateStorage();
+        
+        toast("Supprimé avec succès", "success");
+        return true;
     } catch (err) {
-        console.error("Erreur lors de la suppression massive:", err);
-        alert("Erreur : certains fichiers n'ont pas pu être supprimés.");
+        console.error("Erreur dbDelete:", err);
+        toast("Erreur suppression", "error");
+        throw err;
     }
 }
 
@@ -942,15 +926,11 @@ function makeFileCard(file) {
 function makeFolderCard(folder) {
     const div = document.createElement('div');
     div.className = 'file-card folder';
-   div.innerHTML = `
-        <div class="card-actions">
-            <button onclick="event.stopPropagation(); dbDelete('', '', true, '${folderName.replace(/'/g, "\\'")}')" class="action-btn danger">
-                🗑️
-            </button>
-        </div>
-        <div class="card-icon">📁</div>
-        <div class="card-name">${folderName}</div>
+    div.innerHTML = `
+        <div class="card-icon icon-folder">${ICONS.folder}</div>
+        <div class="card-name">${escHtml(folder.name)}</div>
     `;
+    div.onclick = () => navigateTo(folder.path);
     return div;
 }
 
