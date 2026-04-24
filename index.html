@@ -539,6 +539,8 @@ async function dbSave(fileData, fileBlob) {
 const nameNoExt = fileData.name
     .replace(/;/g, '-')
     .replace(/\s+/g, '_')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .slice(0, -(ext.length + 1));
 const shortBase = nameNoExt.slice(0, 40);
 const uniqueName = `${Date.now()}-${shortBase}.${ext}`;
