@@ -535,10 +535,10 @@ function updateBadges() {
 }
 
 async function dbSave(fileData, fileBlob) {
-    const ext = fileData.name.split('.').pop();
+   const ext = fileData.name.split('.').pop();
 const nameNoExt = fileData.name
     .replace(/;/g, '-')
-    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+/g, '_')
     .slice(0, -(ext.length + 1));
 const shortBase = nameNoExt.slice(0, 40);
 const uniqueName = `${Date.now()}-${shortBase}.${ext}`;
