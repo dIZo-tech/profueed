@@ -535,9 +535,12 @@ function updateBadges() {
 }
 
 async function dbSave(fileData, fileBlob) {
-    const cleanName = fileData.name.replace(/[;#&+%?:,]/g, '-').replace(/\s+/g, ' ');
-const shortName = cleanName.slice(0, 60) + '.' + cleanName.split('.').pop();
-const uniqueName = `${Date.now()}-${shortName}`;
+    const cleanName = fileData.name
+    .replace(/[;#&+%?:,]/g, '-')
+    .replace(/\s+/g, '_');
+const ext = cleanName.split('.').pop();
+const baseName = cleanName.slice(0, 60 - ext.length - 1);
+const uniqueName = `${Date.now()}-${baseName}.${ext}`;
     const filePath = `uploads/${uniqueName}`;
 
     // 1. Upload vers Storage Bucket "SAC"
