@@ -732,7 +732,7 @@ async function processFiles(fileList) {
             // 2. IMPORTANT : On définit le chemin EXACT dans le bucket SAC
             // Si c'est un fichier seul, ce sera "SAC/photo.jpg"
             // Si c'est un dossier, ce sera "SAC/MonDossier/photo.jpg"
-            const storagePath = `SAC/${rel}`;
+            const storagePath = `SAC/${path}/${name}`;
 
             // 3. On envoie tout ça à dbSave
             // On ajoute storage_path pour que la suppression sache quoi effacer
