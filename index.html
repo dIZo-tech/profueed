@@ -723,7 +723,10 @@ async function processFiles(fileList) {
             const rel = file.webkitRelativePath || file.name;
             const parts = rel.split('/');
             const name = parts[parts.length - 1];
-            const path = parts.slice(0, -1).join('/');
+// Si pas de chemin relatif, on utilise currentPath comme dossier de destination
+            const path = parts.length > 1 
+    ? parts.slice(0, -1).join('/') 
+    : currentPath;
             const category = getCategory(name, file.type);
 
             // 2. IMPORTANT : On définit le chemin EXACT dans le bucket SAC
