@@ -999,7 +999,7 @@ function makeFolderCard(folder) {
     div.className = 'file-card folder';
     div.innerHTML = `
     <div class="card-actions">
-        <button class="action-btn danger" title="Supprimer le dossier" onclick="deleteFolder('${folder.path}', event)">
+        <button class="action-btn danger" title="Supprimer le dossier" data-path="${folder.path}" onclick="deleteFolder(this.dataset.path, event)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
         </button>
     </div>
@@ -1010,7 +1010,6 @@ function makeFolderCard(folder) {
     return div;
 }
 
-// 3. Pour les fichiers en mode LISTE
 function makeFileRow(file) {
     const div = document.createElement('div');
     div.className = 'file-row';
@@ -1026,7 +1025,6 @@ function makeFileRow(file) {
     return div;
 }
 
-// 4. Pour les dossiers en mode LISTE
 function makeFolderRow(folder) {
     const div = document.createElement('div');
     div.className = 'file-row';
@@ -1034,7 +1032,7 @@ function makeFolderRow(folder) {
     <div class="row-icon icon-folder">${ICONS.folder}</div>
     <div class="row-name">${escHtml(folder.name)}</div>
     <div class="row-actions">
-        <button class="action-btn danger" onclick="deleteFolder('${folder.path}', event)">🗑️</button>
+        <button class="action-btn danger" data-path="${folder.path}" onclick="deleteFolder(this.dataset.path, event)">🗑️</button>
     </div>
 `;
     div.onclick = () => navigateTo(folder.path);
