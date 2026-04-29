@@ -725,8 +725,8 @@ async function processFiles(fileList) {
             const name = parts[parts.length - 1];
 // Si pas de chemin relatif, on utilise currentPath comme dossier de destination
             const path = parts.length > 1 
-    ? parts.slice(0, -1).join('/') 
-    : currentPath;
+              ? currentPath + (currentPath ? '/' : '') + parts.slice(0, -1).join('/')
+              : currentPath;
             const category = getCategory(name, file.type);
 
             // 2. IMPORTANT : On définit le chemin EXACT dans le bucket SAC
