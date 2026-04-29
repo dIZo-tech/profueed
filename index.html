@@ -1052,7 +1052,7 @@ function renderFolderNav() {
 }
 
 function updateStorage() {
-    const total = allFiles.reduce((s, f) => s + f.size, 0);
+    const total = allFiles.reduce((s, f) => s + (Number(f.size) || 0), 0);
     document.getElementById('storageText').textContent = formatSize(total);
     document.getElementById('storageFill').style.width = Math.min(100, (total / (500*1024*1024)) * 100) + '%';
 }
