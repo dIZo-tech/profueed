@@ -407,7 +407,12 @@
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+#dropZone { display: none !important; }
+  .btn-delete, .danger { display: none !important; }
 
+  /* ─── Modal ─── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.80);
   /* ─── Folder card hover actions ─── */
   .file-card.folder:hover .card-actions,
   .file-row[data-cat="folder"]:hover .row-actions { opacity: 1; }
@@ -1110,23 +1115,21 @@ document.addEventListener('drop', async e => {
 /* ─── Init Sécurisé avec Hiérarchie ─── */
 async function init() {
     try {
-        // 1. On récupère la session actuelle pour savoir qui est connecté
+        // 1. On récupère la session actuelle
         const { data: { session } } = await supabaseClient.auth.getSession();
         
-        // 2. DEFINITION DE LA HIERARCHIE
-        // Remplace la chaîne de caractères ci-dessous par ton UUID Supabase
-        // Remplace l'ancienne ligne par celle-ci avec TON code :
-const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
+        // 2. DEFINITION DE LA HIERARCHIE (Ton ID est nickel)
+        const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
         window.isAdmin = session?.user?.id === myAdminUuid;
 
         // 3. CONTROLE DE L'INTERFACE (CLIENT)
         const dropZone = document.getElementById('dropZone');
         if (dropZone) {
-            // Si pas admin, on cache totalement la zone d'upload
-            dropZone.style.display = window.isAdmin ? 'block' : 'none';
+            // On utilise setProperty pour être plus fort que le CSS "!important"
+            dropZone.style.setProperty('display', window.isAdmin ? 'block' : 'none', 'important');
         }
 
-        // 4. CHARGEMENT DES DONNEES (Ta logique d'origine)
+        // 4. CHARGEMENT DES DONNEES
         const { data, error } = await supabaseClient
             .from('Documents')
             .select('*')
@@ -1136,23 +1139,27 @@ const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
         allFiles = data || [];
 
         // 5. RENDU
-        render();
+        render(); // C'est ici que tes fichiers s'affichent
         
-        if (typeof updateBadges === 'function') {
-            updateBadges();
+        // --- LE PETIT AJOUT POUR LES POUBELLES ---
+        if (window.isAdmin) {
+            // On cherche tous les boutons de suppression et on les montre
+            document.querySelectorAll('.btn-delete, .danger').forEach(el => {
+                el.style.setProperty('display', 'flex', 'important');
+            });
         }
-        
+        // -----------------------------------------
+
+        if (typeof updateBadges === 'function') { updateBadges(); }
         renderBreadcrumb();
         
-        console.log("Initialisation terminée.");
-        console.log("Statut :", window.isAdmin ? "ADMIN (Accès total)" : "INVITÉ (Lecture seule)");
+        console.log("Statut :", window.isAdmin ? "ADMIN" : "INVITÉ");
 
     } catch (err) {
         console.error("Erreur critique lors de l'init :", err);
     }
 }
 
-// On lance la machine
 init();
 /* ─── GESTION DE L'INTERFACE ADMIN ─── */
 
