@@ -482,6 +482,11 @@
         <span id="storageText">0 Mo</span>
       </div>
       <div class="storage-bar"><div class="storage-fill" id="storageFill" style="width:0%"></div></div>
+      
+      <!-- Bouton ajouté ici -->
+      <button id="authBtn" onclick="openAuthModal()" style="background:none; border:none; color:var(--muted); font-size:11px; cursor:pointer; margin-top:12px; text-decoration:underline; font-family:var(--font-body);">
+        Administration
+      </button>
     </div>
   </aside>
 
@@ -977,50 +982,67 @@ const ICONS = {
 function makeFileCard(file) {
     const div = document.createElement('div');
     div.className = 'file-card';
+    
+    // On définit le bouton de suppression uniquement si l'utilisateur est admin
+    const deleteBtn = window.isAdmin ? `
+        <button class="action-btn danger" title="Supprimer" onclick="deleteFile(${file.id},event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>` : '';
+
     div.innerHTML = `
         <div class="card-actions">
             <button class="action-btn" title="Télécharger" onclick="downloadFile(allFiles.find(f=>f.id===${file.id}),event)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>
-            <button class="action-btn danger" title="Supprimer" onclick="deleteFile(${file.id},event)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-            </button>
+            ${deleteBtn}
         </div>
         <div class="card-icon icon-${file.category}">${ICONS[file.category] || ICONS.other}</div>
         <div class="card-name">${escHtml(file.name)}</div>
         <div class="card-meta">${formatSize(file.size)}</div>`;
+        
     div.onclick = () => previewFile(file);
     return div;
 }
-
 // 2. POUR LES DOSSIERS
 function makeFolderCard(folder) {
     const div = document.createElement('div');
     div.className = 'file-card folder';
+    
+    // Protection du bouton supprimer pour les dossiers
+    const deleteBtn = window.isAdmin ? `
+        <div class="card-actions">
+            <button class="action-btn danger" title="Supprimer le dossier">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            </button>
+        </div>` : '';
+
     div.innerHTML = `
-    <div class="card-actions">
-        <button class="action-btn danger" title="Supprimer le dossier">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-        </button>
-    </div>
-    <div class="card-icon icon-folder">${ICONS.folder}</div>
-    <div class="card-name">${escHtml(folder.name)}</div>
-`;
-    div.querySelector('.action-btn.danger').onclick = (e) => { e.stopPropagation(); deleteFolder(folder.path, e); };
+        ${deleteBtn}
+        <div class="card-icon icon-folder">${ICONS.folder}</div>
+        <div class="card-name">${escHtml(folder.name)}</div>
+    `;
+    
+    if (window.isAdmin) {
+        div.querySelector('.action-btn.danger').onclick = (e) => { e.stopPropagation(); deleteFolder(folder.path, e); };
+    }
     div.onclick = () => navigateTo(folder.path);
     return div;
 }
-
 function makeFileRow(file) {
     const div = document.createElement('div');
     div.className = 'file-row';
+    
+    // Bouton supprimer visible uniquement pour l'admin
+    const deleteBtn = window.isAdmin ? `
+        <button class="action-btn danger" onclick="deleteFile(${file.id},event)">🗑️</button>` : '';
+
     div.innerHTML = `
         <div class="row-icon icon-${file.category}">${ICONS[file.category] || ICONS.other}</div>
         <div class="row-name">${escHtml(file.name)}</div>
         <div class="row-size">${formatSize(file.size)}</div>
         <div class="row-actions">
             <button class="action-btn" onclick="downloadFile(allFiles.find(f=>f.id===${file.id}),event)">📥</button>
-            <button class="action-btn danger" onclick="deleteFile(${file.id},event)">🗑️</button>
+            ${deleteBtn}
         </div>`;
     div.onclick = () => previewFile(file);
     return div;
@@ -1029,18 +1051,24 @@ function makeFileRow(file) {
 function makeFolderRow(folder) {
     const div = document.createElement('div');
     div.className = 'file-row';
+    
+    const deleteBtn = window.isAdmin ? `
+        <div class="row-actions">
+            <button class="action-btn danger">🗑️</button>
+        </div>` : '';
+
     div.innerHTML = `
-    <div class="row-icon icon-folder">${ICONS.folder}</div>
-    <div class="row-name">${escHtml(folder.name)}</div>
-    <div class="row-actions">
-        <button class="action-btn danger">🗑️</button>
-    </div>
-`;
-    div.querySelector('.action-btn.danger').onclick = (e) => { e.stopPropagation(); deleteFolder(folder.path, e); };
+        <div class="row-icon icon-folder">${ICONS.folder}</div>
+        <div class="row-name">${escHtml(folder.name)}</div>
+        ${deleteBtn}
+    `;
+    
+    if (window.isAdmin) {
+        div.querySelector('.action-btn.danger').onclick = (e) => { e.stopPropagation(); deleteFolder(folder.path, e); };
+    }
     div.onclick = () => navigateTo(folder.path);
     return div;
 }
-
 function renderFolderNav() {
     const nav = document.getElementById('folderNav');
     nav.innerHTML = '';
@@ -1079,30 +1107,105 @@ document.addEventListener('drop', async e => {
 /* ─── Init ──────────────────────────────────────────────────────── */
 // Remplace ton ancien bloc init par celui-ci tout en bas :
 // Remplace ton ancien bloc init par celui-ci tout en bas :
+/* ─── Init Sécurisé avec Hiérarchie ─── */
 async function init() {
     try {
-        // On récupère les données
-        const { data, error } = await supabaseClient.from('Documents').select('*');
+        // 1. On récupère la session actuelle pour savoir qui est connecté
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        // 2. DEFINITION DE LA HIERARCHIE
+        // Remplace la chaîne de caractères ci-dessous par ton UUID Supabase
+        // Remplace l'ancienne ligne par celle-ci avec TON code :
+const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
+        window.isAdmin = session?.user?.id === myAdminUuid;
+
+        // 3. CONTROLE DE L'INTERFACE (CLIENT)
+        const dropZone = document.getElementById('dropZone');
+        if (dropZone) {
+            // Si pas admin, on cache totalement la zone d'upload
+            dropZone.style.display = window.isAdmin ? 'block' : 'none';
+        }
+
+        // 4. CHARGEMENT DES DONNEES (Ta logique d'origine)
+        const { data, error } = await supabaseClient
+            .from('Documents')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
         if (error) throw error;
         allFiles = data || [];
 
-        // On lance l'affichage
+        // 5. RENDU
         render();
         
-        // On met à jour les badges (on vérifie si la fonction existe)
         if (typeof updateBadges === 'function') {
             updateBadges();
         }
         
         renderBreadcrumb();
-        console.log("Initialisation réussie !");
+        
+        console.log("Initialisation terminée.");
+        console.log("Statut :", window.isAdmin ? "ADMIN (Accès total)" : "INVITÉ (Lecture seule)");
+
     } catch (err) {
-        console.error("Erreur Init:", err);
+        console.error("Erreur critique lors de l'init :", err);
     }
 }
 
-// On lance enfin la machine
+// On lance la machine
 init();
+/* ─── GESTION DE L'INTERFACE ADMIN ─── */
+
+// 1. Ouvre la fenêtre de connexion
+function openAuthModal() {
+    document.getElementById('authOverlay').classList.add('open');
+}
+
+// 2. Ferme la fenêtre de connexion
+function closeAuthModal(e) {
+    // Si on clique sur le fond noir, on ferme
+    if (e && e.target !== document.getElementById('authOverlay')) return;
+    document.getElementById('authOverlay').classList.remove('open');
+}
+
+// 3. Gère la connexion avec Supabase
+async function handleLogin() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPwd').value;
+    const errorEl = document.getElementById('authError');
+
+    // On demande à Supabase de nous connecter
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        errorEl.textContent = "Erreur : " + error.message;
+    } else {
+        // Si ça marche, on recharge la page
+        // C'est là que init() va voir ton ID et activer les boutons !
+        location.reload();
+    }
+}
 </script>
-</body>
+<!-- ... tout ton code actuel ... -->
+
+    <!-- Tu colles le bloc ici -->
+    <div class="overlay" id="authOverlay" onclick="closeAuthModal(event)">
+      <div class="modal" style="max-width:350px; background: var(--bg2);">
+        <div class="modal-header">
+          <span class="modal-title" style="font-family: var(--font-display);">Connexion Admin</span>
+          <button class="modal-close" onclick="closeAuthModal()">✕</button>
+        </div>
+        <div style="padding:24px; display:flex; flex-direction:column; gap:12px;">
+          <input type="email" id="authEmail" placeholder="Email" style="padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:white; font-family:var(--font-body);">
+          <input type="password" id="authPwd" placeholder="Mot de passe" style="padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:white; font-family:var(--font-body);">
+          <button class="btn-upload" onclick="handleLogin()" style="margin-top:8px; width:100%; justify-content:center;">Se connecter</button>
+          <div id="authError" style="color:var(--pdf); font-size:12px; text-align:center; margin-top: 8px;"></div>
+        </div>
+      </div>
+    </div>
+
+</body> <!-- C'est ici que tu t'arrêtes -->
 </html>
