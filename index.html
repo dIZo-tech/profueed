@@ -55,7 +55,7 @@
 
   /* ─── Layout ─── */
   .app { display: flex; height: 100vh; overflow: hidden; }
-#appWrapper { width: 100%; height: 100vh; }
+#appWrapper { width: 100%; height: 100%; }
   /* ─── Sidebar ─── */
   .sidebar {
     width: 250px; min-width: 250px;
@@ -1138,7 +1138,7 @@ async function init() {
 
         // Connecté → on cache le login et on affiche le drive
         document.getElementById('authOverlay').style.display = 'none';
-        document.getElementById('appWrapper').style.display = 'flex';
+        document.getElementById('appWrapper').style.display = 'block';
 
         const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
         window.isAdmin = session?.user?.id === myAdminUuid;
