@@ -431,6 +431,7 @@
 
 <div id="uploadProgress"></div>
 
+<div id="appWrapper" style="display:none; width:100%; height:100%;">
 <div class="app">
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -1116,51 +1117,41 @@ document.addEventListener('drop', async e => {
 /* ─── Init Sécurisé avec Hiérarchie ─── */
 async function init() {
     try {
-        // 1. On récupère la session actuelle
         const { data: { session } } = await supabaseClient.auth.getSession();
-        
-        // 2. DEFINITION DE LA HIERARCHIE (Ton ID est nickel)
+
+        // Si pas connecté du tout → on affiche la page de login et on arrête
+        if (!session) {
+            document.getElementById('appWrapper').style.display = 'none';
+            document.getElementById('authOverlay').style.display = 'flex';
+            return;
+        }
+
+        // Connecté → on cache le login et on affiche le drive
+        document.getElementById('authOverlay').style.display = 'none';
+        document.getElementById('appWrapper').style.display = 'flex';
+
         const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
         window.isAdmin = session?.user?.id === myAdminUuid;
 
-        // 3. CONTROLE DE L'INTERFACE (CLIENT)
         const dropZone = document.getElementById('dropZone');
         if (dropZone) {
-            // On utilise setProperty pour être plus fort que le CSS "!important"
             dropZone.style.setProperty('display', window.isAdmin ? 'block' : 'none', 'important');
         }
 
-        // 4. CHARGEMENT DES DONNEES
-        const { data, error } = await supabaseClient
-            .from('Documents')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
+        const { data, error } = await supabaseClient.from('Documents').select('*').order('created_at', { ascending: false });
         if (error) throw error;
         allFiles = data || [];
 
-        // 5. RENDU
-        render(); // C'est ici que tes fichiers s'affichent
-        
-        // --- LE PETIT AJOUT POUR LES POUBELLES ---
-        if (window.isAdmin) {
-            // On cherche tous les boutons de suppression et on les montre
-            document.querySelectorAll('.btn-delete, .danger').forEach(el => {
-                el.style.setProperty('display', 'flex', 'important');
-            });
-        }
-        // -----------------------------------------
-
-        if (typeof updateBadges === 'function') { updateBadges(); }
+        render();
+        if (typeof updateBadges === 'function') updateBadges();
         renderBreadcrumb();
-        
-        console.log("Statut :", window.isAdmin ? "ADMIN" : "INVITÉ");
+        updateStorage();
 
+        console.log("Statut :", window.isAdmin ? "ADMIN" : "INVITÉ");
     } catch (err) {
-        console.error("Erreur critique lors de l'init :", err);
+        console.error("Erreur critique :", err);
     }
 }
-
 init();
 /* ─── GESTION DE L'INTERFACE ADMIN ─── */
 
@@ -1214,6 +1205,6 @@ async function handleLogin() {
         </div>
       </div>
     </div>
-
+</div>
 </body> <!-- C'est ici que tu t'arrêtes -->
 </html>
