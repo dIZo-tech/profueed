@@ -55,7 +55,7 @@
 
   /* ─── Layout ─── */
   .app { display: flex; height: 100vh; overflow: hidden; }
-
+#appWrapper { width: 100%; height: 100vh; }
   /* ─── Sidebar ─── */
   .sidebar {
     width: 250px; min-width: 250px;
@@ -429,9 +429,19 @@
 </head>
 <body>
 
-<div id="uploadProgress"></div>
+<div id="authOverlay" style="display:flex; position:fixed; inset:0; background:#0D0D0D; align-items:center; justify-content:center; z-index:9999;">
+  <div style="background:#161616; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:40px; width:100%; max-width:400px; text-align:center;">
+    <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:6px;">Study<span style="color:#F7C948">Drive</span></div>
+    <div style="font-size:12px; color:rgba(240,237,230,0.45); margin-bottom:32px; letter-spacing:1px; text-transform:uppercase;">Accès restreint</div>
+    <input id="authEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
+    <input id="authPwd" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:20px;"/>
+    <button onclick="handleLogin()" style="width:100%; padding:12px; background:#F7C948; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Se connecter</button>
+    <div id="authError" style="color:#FF6B35; font-size:12px; margin-top:12px; display:none;">Email ou mot de passe incorrect.</div>
+  </div>
+</div>
+  <div id="uploadProgress"></div>
 
-<div id="appWrapper" style="display:none; width:100%; height:100%;">
+<div id="appWrapper" style="display:none;">
 <div class="app">
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -489,10 +499,10 @@
       </div>
       <div class="storage-bar"><div class="storage-fill" id="storageFill" style="width:0%"></div></div>
       
-      <!-- Bouton ajouté ici -->
-      <button id="authBtn" onclick="openAuthModal()" style="background:none; border:none; color:var(--muted); font-size:11px; cursor:pointer; margin-top:12px; text-decoration:underline; font-family:var(--font-body);">
-        Administration
-      </button>
+  <button onclick="handleLogout()" style="width:100%; padding:9px; background:transparent; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:rgba(240,237,230,0.45); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; margin-top:8px;">
+  Se déconnecter
+</button>
+     
     </div>
   </aside>
 
@@ -1155,18 +1165,6 @@ async function init() {
 init();
 /* ─── GESTION DE L'INTERFACE ADMIN ─── */
 
-// 1. Ouvre la fenêtre de connexion
-function openAuthModal() {
-    document.getElementById('authOverlay').classList.add('open');
-}
-
-// 2. Ferme la fenêtre de connexion
-function closeAuthModal(e) {
-    // Si on clique sur le fond noir, on ferme
-    if (e && e.target !== document.getElementById('authOverlay')) return;
-    document.getElementById('authOverlay').classList.remove('open');
-}
-
 // 3. Gère la connexion avec Supabase
 async function handleLogin() {
     const email = document.getElementById('authEmail').value;
@@ -1187,24 +1185,12 @@ async function handleLogin() {
         location.reload();
     }
 }
-</script>
-<!-- ... tout ton code actuel ... -->
 
-    <!-- Tu colles le bloc ici -->
-    <div class="overlay" id="authOverlay" onclick="closeAuthModal(event)">
-      <div class="modal" style="max-width:350px; background: var(--bg2);">
-        <div class="modal-header">
-          <span class="modal-title" style="font-family: var(--font-display);">Connexion Admin</span>
-          <button class="modal-close" onclick="closeAuthModal()">✕</button>
-        </div>
-        <div style="padding:24px; display:flex; flex-direction:column; gap:12px;">
-          <input type="email" id="authEmail" placeholder="Email" style="padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:white; font-family:var(--font-body);">
-          <input type="password" id="authPwd" placeholder="Mot de passe" style="padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:white; font-family:var(--font-body);">
-          <button class="btn-upload" onclick="handleLogin()" style="margin-top:8px; width:100%; justify-content:center;">Se connecter</button>
-          <div id="authError" style="color:var(--pdf); font-size:12px; text-align:center; margin-top: 8px;"></div>
-        </div>
-      </div>
-    </div>
+async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    location.reload();
+}
+</script>
 </div>
 </body> <!-- C'est ici que tu t'arrêtes -->
 </html>
