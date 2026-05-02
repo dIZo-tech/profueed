@@ -453,104 +453,110 @@
 
     <!-- Formulaire inscription -->
 <div id="registerForm" style="display:none;">
-  
-  <!-- Étape 1 : Email + MDP -->
+  <div style="position:relative; overflow:hidden; margin:-40px -40px 28px -40px; padding:28px 40px; background:linear-gradient(135deg, #1a0000 0%, #2d0000 50%, #0d0000 100%); border-bottom:1px solid rgba(180,0,0,0.3);">
+    <div style="position:absolute; inset:0; background:radial-gradient(ellipse at 30% 50%, rgba(180,0,0,0.15) 0%, transparent 70%);"></div>
+    <div style="font-family:'Syne',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(180,0,0,0.7); margin-bottom:8px;">Accès limité</div>
+    <div style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:#F0EDE6; line-height:1.5; position:relative;">S/o le new ! Comment ça va ?<br><span style="color:rgba(220,60,60,0.9);">Bienvenue.</span> On sait pourquoi t'es là.<br>On est là aussi.</div>
+    <div style="position:absolute; bottom:-1px; right:20px; width:60px; height:2px; background:linear-gradient(90deg, transparent, #CC0000);"></div>
+  </div>
+
+  <!-- Étape 1 -->
   <div id="step1">
-    <div style="font-size:11px; color:rgba(240,237,230,0.45); margin-bottom:16px; letter-spacing:1px; text-transform:uppercase;">Étape 1 / 3 — Connexion</div>
-    <input id="regEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
+    <div style="font-size:10px; color:rgba(200,0,0,0.6); margin-bottom:16px; letter-spacing:1.5px; text-transform:uppercase;">Étape 1 / 3 — Identification</div>
+    <input id="regEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px; transition:border-color .2s;" onfocus="this.style.borderColor='rgba(200,0,0,0.6)'" onblur="this.style.borderColor='rgba(180,0,0,0.25)'"/>
     <div style="position:relative; width:100%; margin-bottom:10px;">
-      <input id="regPassword" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;"/>
-      <button onclick="toggleRegPwd()" type="button" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(240,237,230,0.45); display:flex; align-items:center;">
+      <input id="regPassword" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; transition:border-color .2s;" onfocus="this.style.borderColor='rgba(200,0,0,0.6)'" onblur="this.style.borderColor='rgba(180,0,0,0.25)'"/>
+      <button onclick="toggleRegPwd()" type="button" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(200,60,60,0.5); display:flex; align-items:center;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
     </div>
-    <div id="step1Error" style="color:#FF6B35; font-size:12px; margin-bottom:10px; min-height:16px;"></div>
-    <button onclick="goStep2()" type="button" style="width:100%; padding:12px; background:#F7C948; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Continuer →</button>
+    <div id="step1Error" style="color:#CC0000; font-size:12px; margin-bottom:10px; min-height:16px;"></div>
+    <button onclick="goStep2()" type="button" style="width:100%; padding:12px; background:linear-gradient(135deg, #8B0000, #CC0000); color:#F0EDE6; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; box-shadow:0 0 20px rgba(180,0,0,0.3); transition:all .2s;" onmouseover="this.style.boxShadow='0 0 30px rgba(200,0,0,0.5)'" onmouseout="this.style.boxShadow='0 0 20px rgba(180,0,0,0.3)'">Continuer →</button>
   </div>
 
-  <!-- Étape 2 : Infos perso -->
+  <!-- Étape 2 -->
   <div id="step2" style="display:none;">
-    <div style="font-size:11px; color:rgba(240,237,230,0.45); margin-bottom:16px; letter-spacing:1px; text-transform:uppercase;">Étape 2 / 3 — Identité</div>
-    <input id="regPrenom" type="text" placeholder="Prénom" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
-    <input id="regNom" type="text" placeholder="Nom" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
-    <input id="regDob" type="date" placeholder="Date de naissance" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
-    <select id="regSexe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;">
+    <div style="font-size:10px; color:rgba(200,0,0,0.6); margin-bottom:16px; letter-spacing:1.5px; text-transform:uppercase;">Étape 2 / 3 — Identité</div>
+    <input id="regPrenom" type="text" placeholder="Prénom" style="width:100%; padding:12px 16px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;" onfocus="this.style.borderColor='rgba(200,0,0,0.6)'" onblur="this.style.borderColor='rgba(180,0,0,0.25)'"/>
+    <input id="regNom" type="text" placeholder="Nom" style="width:100%; padding:12px 16px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;" onfocus="this.style.borderColor='rgba(200,0,0,0.6)'" onblur="this.style.borderColor='rgba(180,0,0,0.25)'"/>
+    <input id="regDob" type="date" style="width:100%; padding:12px 16px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;" onfocus="this.style.borderColor='rgba(200,0,0,0.6)'" onblur="this.style.borderColor='rgba(180,0,0,0.25)'"/>
+    <select id="regSexe" style="width:100%; padding:12px 16px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;">
       <option value="">Sexe</option>
       <option value="homme">Homme</option>
       <option value="femme">Femme</option>
       <option value="autre">Préfère ne pas dire</option>
     </select>
-    <div id="step2Error" style="color:#FF6B35; font-size:12px; margin-bottom:10px; min-height:16px;"></div>
+    <div id="step2Error" style="color:#CC0000; font-size:12px; margin-bottom:10px; min-height:16px;"></div>
     <div style="display:flex; gap:8px;">
-      <button onclick="goStep1()" type="button" style="width:40%; padding:12px; background:transparent; color:#F0EDE6; border:1px solid rgba(255,255,255,0.15); border-radius:10px; font-size:14px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour</button>
-      <button onclick="goStep3()" type="button" style="width:60%; padding:12px; background:#F7C948; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Continuer →</button>
+      <button onclick="goStep1()" type="button" style="width:40%; padding:12px; background:transparent; color:rgba(200,60,60,0.7); border:1px solid rgba(180,0,0,0.25); border-radius:10px; font-size:14px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour</button>
+      <button onclick="goStep3()" type="button" style="width:60%; padding:12px; background:linear-gradient(135deg, #8B0000, #CC0000); color:#F0EDE6; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; box-shadow:0 0 20px rgba(180,0,0,0.3);">Continuer →</button>
     </div>
   </div>
 
-  <!-- Étape 3 : Motivation -->
+  <!-- Étape 3 -->
   <div id="step3" style="display:none;">
-    <div style="font-size:11px; color:rgba(240,237,230,0.45); margin-bottom:16px; letter-spacing:1px; text-transform:uppercase;">Étape 3 / 3 — Motivation</div>
-    
-    <div style="text-align:left; margin-bottom:10px;">
-      <div style="font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">Tu es en quelle classe ?</div>
+    <div style="font-size:10px; color:rgba(200,0,0,0.6); margin-bottom:16px; letter-spacing:1.5px; text-transform:uppercase;">Étape 3 / 3 — Motivation</div>
+
+    <div style="text-align:left; margin-bottom:14px;">
+      <div style="font-size:12px; color:rgba(240,237,230,0.5); margin-bottom:8px;">Tu es en quelle classe ?</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button onclick="selectOption(this,'classe')" data-value="Terminale" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Terminale</button>
-        <button onclick="selectOption(this,'classe')" data-value="Première" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Première</button>
-        <button onclick="selectOption(this,'classe')" data-value="Autre" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Autre</button>
+        <button onclick="selectOption(this,'classe')" data-value="Terminale" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Terminale</button>
+        <button onclick="selectOption(this,'classe')" data-value="Première" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Première</button>
+        <button onclick="selectOption(this,'classe')" data-value="Autre" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Autre</button>
       </div>
     </div>
 
-    <div style="text-align:left; margin-bottom:10px;">
-      <div style="font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">Ton niveau actuel en cours ?</div>
+    <div style="text-align:left; margin-bottom:14px;">
+      <div style="font-size:12px; color:rgba(240,237,230,0.5); margin-bottom:8px;">Ton niveau actuel en cours ?</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button onclick="selectOption(this,'niveau')" data-value="Nul" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">😭 Nul</button>
-        <button onclick="selectOption(this,'niveau')" data-value="Moyen" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">😐 Moyen</button>
-        <button onclick="selectOption(this,'niveau')" data-value="Bien" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">😊 Bien</button>
-        <button onclick="selectOption(this,'niveau')" data-value="Excellent" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">🔥 Excellent</button>
+        <button onclick="selectOption(this,'niveau')" data-value="Nul" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">😭 Nul</button>
+        <button onclick="selectOption(this,'niveau')" data-value="Moyen" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">😐 Moyen</button>
+        <button onclick="selectOption(this,'niveau')" data-value="Bien" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">😊 Bien</button>
+        <button onclick="selectOption(this,'niveau')" data-value="Excellent" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">🔥 Excellent</button>
       </div>
     </div>
 
-    <div style="text-align:left; margin-bottom:10px;">
-      <div style="font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">Comment t'as connu le site ?</div>
+    <div style="text-align:left; margin-bottom:14px;">
+      <div style="font-size:12px; color:rgba(240,237,230,0.5); margin-bottom:8px;">Comment t'as connu le site ?</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button onclick="selectOption(this,'comment')" data-value="Bouche à oreille" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Bouche à oreille</button>
-        <button onclick="selectOption(this,'comment')" data-value="Réseaux sociaux" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Réseaux sociaux</button>
-        <button onclick="selectOption(this,'comment')" data-value="Un ami" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Un ami</button>
-        <button onclick="selectOption(this,'comment')" data-value="Autre" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Autre</button>
+        <button onclick="selectOption(this,'comment')" data-value="Bouche à oreille" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Bouche à oreille</button>
+        <button onclick="selectOption(this,'comment')" data-value="Réseaux sociaux" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Réseaux sociaux</button>
+        <button onclick="selectOption(this,'comment')" data-value="Un ami" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Un ami</button>
+        <button onclick="selectOption(this,'comment')" data-value="Autre" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Autre</button>
       </div>
     </div>
 
-    <div style="text-align:left; margin-bottom:10px;">
-      <div style="font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">Ton objectif ?</div>
+    <div style="text-align:left; margin-bottom:14px;">
+      <div style="font-size:12px; color:rgba(240,237,230,0.5); margin-bottom:8px;">Ton objectif ?</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button onclick="selectOption(this,'objectif')" data-value="Rattraper" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Rattraper</button>
-        <button onclick="selectOption(this,'objectif')" data-value="Progresser" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Progresser</button>
-        <button onclick="selectOption(this,'objectif')" data-value="Bonne note au bac" class="opt-btn" style="padding:8px 14px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer;">Bonne note au bac</button>
+        <button onclick="selectOption(this,'objectif')" data-value="Rattraper" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Rattraper</button>
+        <button onclick="selectOption(this,'objectif')" data-value="Progresser" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Progresser</button>
+        <button onclick="selectOption(this,'objectif')" data-value="Bonne note au bac" class="opt-btn" style="padding:8px 14px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:8px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .2s;">Bonne note au bac</button>
       </div>
     </div>
 
-    <div style="text-align:left; margin-bottom:10px;">
-      <div style="font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">Pourquoi tu veux rejoindre ? <span style="color:rgba(240,237,230,0.35)">(20 mots min)</span></div>
-      <textarea id="regMessage" placeholder="Exprime-toi librement..." style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; resize:none; height:90px;"></textarea>
-      <div id="wordCount" style="font-size:11px; color:rgba(240,237,230,0.35); text-align:right; margin-top:4px;">0 / 20 mots</div>
+    <div style="text-align:left; margin-bottom:14px;">
+      <div style="font-size:12px; color:rgba(240,237,230,0.5); margin-bottom:6px;">Pourquoi tu veux rejoindre ? <span style="color:rgba(200,0,0,0.5)">(20 mots min)</span></div>
+      <textarea id="regMessage" placeholder="Exprime-toi librement..." style="width:100%; padding:12px 16px; background:#1a0a0a; border:1px solid rgba(180,0,0,0.25); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; resize:none; height:90px;" onfocus="this.style.borderColor='rgba(200,0,0,0.6)'" onblur="this.style.borderColor='rgba(180,0,0,0.25)'"></textarea>
+      <div id="wordCount" style="font-size:11px; color:rgba(200,0,0,0.4); text-align:right; margin-top:4px;">0 / 20 mots</div>
     </div>
 
-    <div id="step3Error" style="color:#FF6B35; font-size:12px; margin-bottom:10px; min-height:16px;"></div>
+    <div id="step3Error" style="color:#CC0000; font-size:12px; margin-bottom:10px; min-height:16px;"></div>
     <div style="display:flex; gap:8px;">
-      <button onclick="goStep2()" type="button" style="width:40%; padding:12px; background:transparent; color:#F0EDE6; border:1px solid rgba(255,255,255,0.15); border-radius:10px; font-size:14px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour</button>
-      <button onclick="handleRegister()" type="button" style="width:60%; padding:12px; background:#2EC4B6; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Créer mon compte</button>
+      <button onclick="goStep2()" type="button" style="width:40%; padding:12px; background:transparent; color:rgba(200,60,60,0.7); border:1px solid rgba(180,0,0,0.25); border-radius:10px; font-size:14px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour</button>
+      <button onclick="handleRegister()" type="button" style="width:60%; padding:12px; background:linear-gradient(135deg, #8B0000, #CC0000); color:#F0EDE6; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; box-shadow:0 0 20px rgba(180,0,0,0.3);">Créer mon compte</button>
     </div>
   </div>
 
   <!-- Confirmation -->
   <div id="stepDone" style="display:none; text-align:center; padding:20px 0;">
-    <div style="font-size:40px; margin-bottom:16px;">✅</div>
-    <div style="font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:10px;">Compte créé !</div>
-    <div style="font-size:13px; color:rgba(240,237,230,0.6); line-height:1.6;">Un email de confirmation t'a été envoyé.<br>Ton compte est en attente de validation.<br>Tu seras notifié dès que l'accès est accordé.</div>
+    <div style="font-size:36px; margin-bottom:16px;">🩸</div>
+    <div style="font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:10px; color:#F0EDE6;">T'es dans la liste.</div>
+    <div style="font-size:13px; color:rgba(240,237,230,0.5); line-height:1.8;">Un email de confirmation t'a été envoyé.<br>Ton accès sera validé manuellement.<br><span style="color:rgba(200,0,0,0.6);">Patience.</span></div>
   </div>
 
-  <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,0.07); padding-top:14px;">
-    <button onclick="showRegister()" type="button" style="width:100%; padding:10px; background:transparent; color:rgba(240,237,230,0.45); border:1px solid rgba(255,255,255,0.07); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour connexion</button>
+  <div style="margin-top:16px; border-top:1px solid rgba(180,0,0,0.15); padding-top:14px;">
+    <button onclick="showRegister()" type="button" style="width:100%; padding:10px; background:transparent; color:rgba(200,60,60,0.5); border:1px solid rgba(180,0,0,0.15); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour connexion</button>
   </div>
 </div>
 
@@ -1409,24 +1415,20 @@ async function handleRegister() {
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { err.textContent = 'Erreur : ' + error.message; return; }
 
-    await supabaseClient.from('profiles').upsert({
-        id: data.user.id,
-        email,
-        prenom,
-        nom,
-        date_naissance: dob,
-        sexe,
-        classe: regData.classe,
-        niveau: regData.niveau,
-        comment_connu: regData.comment,
-        objectif: regData.objectif,
-        message,
-        approved: false
-    });
+await supabaseClient.from('profiles').update({
+    prenom,
+    nom,
+    date_naissance: dob,
+    sexe,
+    classe: regData.classe,
+    niveau: regData.niveau,
+    comment_connu: regData.comment,
+    objectif: regData.objectif,
+    message,
+}).eq('id', data.user.id);
 
-    document.getElementById('step3').style.display = 'none';
-    document.getElementById('stepDone').style.display = 'block';
-}
+document.getElementById('step3').style.display = 'none';
+document.getElementById('stepDone').style.display = 'block';
 </script>
 </div>
 </body> <!-- C'est ici que tu t'arrêtes -->
