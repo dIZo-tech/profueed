@@ -434,7 +434,11 @@
     <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:6px;">Study<span style="color:#F7C948">Drive</span></div>
     <div style="font-size:12px; color:rgba(240,237,230,0.45); margin-bottom:32px; letter-spacing:1px; text-transform:uppercase;">Accès restreint</div>
     <input id="authEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
-    <input id="authPwd" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:20px;"/>
+
+<div style="position:relative; width:100%; margin-bottom:20px;">
+    <input id="authPwd" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;"/>
+    <button onclick="togglePwd()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(240,237,230,0.45); font-size:16px;" type="button">👁️</button>
+</div>
     <button onclick="handleLogin()" style="width:100%; padding:12px; background:#F7C948; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Se connecter</button>
     <div id="authError" style="color:#FF6B35; font-size:12px; margin-top:12px; display:none;">Email ou mot de passe incorrect.</div>
   </div>
@@ -1178,12 +1182,16 @@ async function handleLogin() {
     });
 
     if (error) {
-        errorEl.textContent = "Erreur : " + error.message;
-    } else {
-        // Si ça marche, on recharge la page
-        // C'est là que init() va voir ton ID et activer les boutons !
-        location.reload();
-    }
+    const msgs = [
+        "Aïe aïe aïe... c'est pas ça 😬",
+        "Raté ! T'as oublié ton mot de passe ou quoi ? 💀",
+        "Nope. Essaie encore champion 🏆",
+        "Accès refusé. Le drive te regarde bizarrement 👀",
+    ];
+    const el = document.getElementById('authError');
+    el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    el.style.display = 'block';
+  }
 }
 
 async function handleLogout() {
