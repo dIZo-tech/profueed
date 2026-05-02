@@ -825,10 +825,17 @@ async function deleteFile(id, e) {
 async function deleteFolder(folderPath, e) {
     e && e.stopPropagation();
     if (!confirm(`Supprimer le dossier "${folderPath}" et tout son contenu ?`)) return;
+    
     const toDelete = allFiles.filter(f => f.path === folderPath || f.path.startsWith(folderPath + '/'));
-    for (const f of toDelete) {
-        await dbDelete(f.id, f.storage_path);
-    }
+    
+    // Suppression Storage en une seule fois
+    const storagePaths = toDelete.map(f => f.storage_path.replace('uploads/', ''));
+    await supabaseClient.storage.from('SAC').remove(storagePaths);
+    
+    // Suppression SQL en une seule fois
+    const ids = toDelete.map(f => f.id);
+    await supabaseClient.from('Documents').delete().in('id', ids);
+    
     allFiles = allFiles.filter(f => !toDelete.includes(f));
     if (currentPath.startsWith(folderPath)) currentPath = '';
     render(); updateBadges(); updateStorage();
