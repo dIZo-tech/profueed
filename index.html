@@ -433,16 +433,35 @@
   <div style="background:#161616; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:40px; width:100%; max-width:400px; text-align:center;">
     <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:6px;">Study<span style="color:#F7C948">Drive</span></div>
     <div style="font-size:12px; color:rgba(240,237,230,0.45); margin-bottom:32px; letter-spacing:1px; text-transform:uppercase;">Accès restreint</div>
-    <input id="authEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
 
-<div style="position:relative; width:100%; margin-bottom:20px;">
-    <input id="authPwd" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;"/>
-    <button onclick="togglePwd()" type="button" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(240,237,230,0.45); display:flex; align-items:center;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-</button>
-</div>
-    <button onclick="handleLogin()" style="width:100%; padding:12px; background:#F7C948; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Se connecter</button>
-    <div id="authError" style="color:#FF6B35; font-size:12px; margin-top:12px; display:none;">Email ou mot de passe incorrect.</div>
+    <!-- Formulaire connexion -->
+    <div id="loginForm">
+      <input id="authEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
+      <div style="position:relative; width:100%; margin-bottom:20px;">
+        <input id="authPwd" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;"/>
+        <button onclick="togglePwd()" type="button" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(240,237,230,0.45); display:flex; align-items:center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button onclick="handleLogin()" style="width:100%; padding:12px; background:#F7C948; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Se connecter</button>
+      <div id="authError" style="color:#FF6B35; font-size:12px; margin-top:12px; min-height:18px;"></div>
+      <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,0.07); padding-top:14px;">
+        <p style="font-size:12px; color:rgba(240,237,230,0.45); margin-bottom:10px;">Pas encore de compte ?</p>
+        <button onclick="showRegister()" type="button" style="width:100%; padding:12px; background:transparent; color:#F0EDE6; border:1px solid rgba(255,255,255,0.15); border-radius:10px; font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer;">S'inscrire</button>
+      </div>
+    </div>
+
+    <!-- Formulaire inscription -->
+    <div id="registerForm" style="display:none;">
+      <input id="regEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
+      <input id="regPassword" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
+      <button onclick="handleRegister()" type="button" style="width:100%; padding:12px; background:#2EC4B6; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Créer mon compte</button>
+      <div id="registerMsg" style="font-size:12px; margin-top:10px; min-height:18px;"></div>
+      <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,0.07); padding-top:14px;">
+        <button onclick="showRegister()" type="button" style="width:100%; padding:12px; background:transparent; color:rgba(240,237,230,0.45); border:1px solid rgba(255,255,255,0.07); border-radius:10px; font-size:14px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour connexion</button>
+      </div>
+    </div>
+
   </div>
 </div>
   <div id="uploadProgress"></div>
@@ -1134,20 +1153,35 @@ document.addEventListener('drop', async e => {
 async function init() {
     try {
         const { data: { session } } = await supabaseClient.auth.getSession();
-
-        // Si pas connecté du tout → on affiche la page de login et on arrête
+        
         if (!session) {
             document.getElementById('appWrapper').style.display = 'none';
             document.getElementById('authOverlay').style.display = 'flex';
             return;
         }
 
-        // Connecté → on cache le login et on affiche le drive
-        document.getElementById('authOverlay').style.display = 'none';
-        document.getElementById('appWrapper').style.display = 'block';
-
         const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
         window.isAdmin = session?.user?.id === myAdminUuid;
+
+        if (!window.isAdmin) {
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('approved')
+                .eq('id', session.user.id)
+                .single();
+            
+            if (!profile?.approved) {
+                document.getElementById('authOverlay').style.display = 'flex';
+                document.getElementById('appWrapper').style.display = 'none';
+                document.getElementById('authError').textContent = "⏳ Ton compte est en attente de validation. Reviens plus tard !";
+                document.getElementById('authError').style.display = 'block';
+                await supabaseClient.auth.signOut();
+                return;
+            }
+        }
+
+        document.getElementById('authOverlay').style.display = 'none';
+        document.getElementById('appWrapper').style.display = 'block';
 
         const dropZone = document.getElementById('dropZone');
         if (dropZone) {
@@ -1157,12 +1191,10 @@ async function init() {
         const { data, error } = await supabaseClient.from('Documents').select('*').order('created_at', { ascending: false });
         if (error) throw error;
         allFiles = data || [];
-
         render();
         if (typeof updateBadges === 'function') updateBadges();
         renderBreadcrumb();
         updateStorage();
-
         console.log("Statut :", window.isAdmin ? "ADMIN" : "INVITÉ");
     } catch (err) {
         console.error("Erreur critique :", err);
@@ -1199,6 +1231,29 @@ async function handleLogout() {
 function togglePwd() {
     const input = document.getElementById('authPwd');
     input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function showRegister() {
+    const login = document.getElementById('loginForm');
+    const register = document.getElementById('registerForm');
+    const isLogin = login.style.display !== 'none';
+    login.style.display = isLogin ? 'none' : 'block';
+    register.style.display = isLogin ? 'block' : 'none';
+}
+
+async function handleRegister() {
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    const msg = document.getElementById('registerMsg');
+    const { error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) {
+        msg.textContent = "Erreur : " + error.message;
+        msg.style.color = '#FF6B35';
+    } else {
+        msg.textContent = "✅ Compte créé ! En attente de validation.";
+        msg.style.color = '#2EC4B6';
+    }
+    msg.style.display = 'block';
 }
 </script>
 </div>
