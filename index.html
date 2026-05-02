@@ -408,7 +408,7 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 #dropZone { display: none !important; }
-  .btn-delete, .danger { display: none !important; }
+  .btn-delete { display: none !important; }
 
   /* ─── Modal ─── */
   .overlay {
@@ -937,7 +937,6 @@ function render() {
     area.innerHTML = '';
     const files = getVisibleFiles();
     const folders = getSubfolders();
-
     if (allFiles.length > 0) {
         statsEl.style.display = 'flex';
         const cats = ['pdf','video','image','audio','doc','other'];
@@ -948,12 +947,10 @@ function render() {
             return n ? `<div class="stat-pill"><div class="stat-dot" style="background:${colors[c]}"></div><strong>${n}</strong> ${labels[c]}</div>` : '';
         }).join('');
     } else { statsEl.style.display = 'none'; }
-
     if (!folders.length && !files.length) {
         area.innerHTML = `<div class="empty-state"><p>Aucun fichier ici. Glissez-déposez pour commencer !</p></div>`;
         return;
     }
-
     if (folders.length) {
         const wrap = document.createElement('div');
         wrap.className = 'section-wrap';
@@ -964,7 +961,6 @@ function render() {
         wrap.appendChild(grid);
         area.appendChild(wrap);
     }
-
     if (files.length) {
         const wrap = document.createElement('div');
         wrap.className = 'section-wrap';
@@ -976,6 +972,11 @@ function render() {
         area.appendChild(wrap);
     }
     renderFolderNav();
+    if (window.isAdmin) {
+        document.querySelectorAll('.action-btn.danger').forEach(el => {
+            el.style.setProperty('display', 'flex', 'important');
+        });
+    }
 }
 
 /* ─── Builders ──────────────────────────────────────────────────── */
@@ -1072,7 +1073,6 @@ function makeFolderRow(folder) {
         <div class="row-actions">
             <button class="action-btn danger">🗑️</button>
         </div>` : '';
-
     div.innerHTML = `
         <div class="row-icon icon-folder">${ICONS.folder}</div>
         <div class="row-name">${escHtml(folder.name)}</div>
