@@ -437,7 +437,9 @@
 
 <div style="position:relative; width:100%; margin-bottom:20px;">
     <input id="authPwd" type="password" placeholder="Mot de passe" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none;"/>
-    <button onclick="togglePwd()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(240,237,230,0.45); font-size:16px;" type="button">👁️</button>
+    <button onclick="togglePwd()" type="button" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(240,237,230,0.45); display:flex; align-items:center;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
 </div>
     <button onclick="handleLogin()" style="width:100%; padding:12px; background:#F7C948; color:#0D0D0D; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;">Se connecter</button>
     <div id="authError" style="color:#FF6B35; font-size:12px; margin-top:12px; display:none;">Email ou mot de passe incorrect.</div>
@@ -1173,30 +1175,30 @@ init();
 async function handleLogin() {
     const email = document.getElementById('authEmail').value;
     const password = document.getElementById('authPwd').value;
-    const errorEl = document.getElementById('authError');
-
-    // On demande à Supabase de nous connecter
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
-
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
-    const msgs = [
-        "Aïe aïe aïe... c'est pas ça 😬",
-        "Raté ! T'as oublié ton mot de passe ou quoi ? 💀",
-        "Nope. Essaie encore champion 🏆",
-        "Accès refusé. Le drive te regarde bizarrement 👀",
-    ];
-    const el = document.getElementById('authError');
-    el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-    el.style.display = 'block';
-  }
+        const msgs = [
+            "Aïe aïe aïe... c'est pas ça 😬",
+            "Raté ! T'as oublié ton mot de passe ou quoi ? 💀",
+            "Nope. Essaie encore champion 🏆",
+            "Accès refusé. Le drive te regarde bizarrement 👀",
+        ];
+        const el = document.getElementById('authError');
+        el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+        el.style.display = 'block';
+    } else {
+        init();
+    }
 }
 
 async function handleLogout() {
     await supabaseClient.auth.signOut();
     location.reload();
+}
+
+function togglePwd() {
+    const input = document.getElementById('authPwd');
+    input.type = input.type === 'password' ? 'text' : 'password';
 }
 </script>
 </div>
