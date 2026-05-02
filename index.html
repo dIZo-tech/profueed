@@ -1105,6 +1105,7 @@ function setProgressValue(v) { document.getElementById('uploadProgress').style.t
 document.addEventListener('dragover', e => e.preventDefault());
 document.addEventListener('drop', async e => {
     e.preventDefault();
+    if (!window.isAdmin) return;
     const files = Array.from(e.dataTransfer.files);
     await processFiles(files);
 });
