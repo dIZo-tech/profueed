@@ -1424,8 +1424,9 @@ await supabaseClient.from('profiles').update({
     message,
 }).eq('id', data.user.id);
 
-document.getElementById('step3').style.display = 'none';
-document.getElementById('stepDone').style.display = 'block';
+    document.getElementById('step3').style.display = 'none';
+    document.getElementById('stepDone').style.display = 'block';
+}
 </script>
 </div>
 </body> <!-- C'est ici que tu t'arrêtes -->
