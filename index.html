@@ -1478,6 +1478,25 @@ async function init() {
 }
 init();
 
+async function handleLogin() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPwd').value;
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+        const msgs = [
+            "Aïe aïe aïe... c'est pas ça 😬",
+            "Raté ! T'as oublié ton mot de passe ou quoi ? 💀",
+            "Nope. Essaie encore champion 🏆",
+            "Accès refusé. Le drive te regarde bizarrement 👀",
+        ];
+        const el = document.getElementById('authError');
+        el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+        el.style.display = 'block';
+    } else {
+        init();
+    }
+}
+
 async function handleLogout() {
     await supabaseClient.auth.signOut();
     location.reload();
