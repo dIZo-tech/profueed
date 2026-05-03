@@ -202,7 +202,12 @@
   .btn-upload svg { width: 14px; height: 14px; }
 
   /* ─── Stats Bar ─── */
-  .stats-bar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+ .stats-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
   .stat-pill {
     display: flex; align-items: center; gap: 8px;
     background: var(--bg2); border: 1px solid var(--border);
@@ -1230,18 +1235,46 @@ area.innerHTML = '';
 if (!window.isAdmin && !document.getElementById('guestHeader')) renderGuestHeader();
     const files = getVisibleFiles();
     const folders = getSubfolders();
-    if (allFiles.length > 0 && window.isAdmin) {
-        statsEl.style.display = 'flex';
-        const cats = ['pdf','video','image','audio','doc','other'];
-        const labels = { pdf:'PDF', video:'Vidéos', image:'Images', audio:'Audio', doc:'Docs', other:'Autres' };
-        const colors = { pdf:'#EF4444', video:'#8B5CF6', image:'#10B981', audio:'#F59E0B', doc:'#3B82F6', other:'#9CA3AF' };
-        statsEl.innerHTML = cats.map(c => {
-            const n = allFiles.filter(f => f.category === c).length;
-            return n ? `<div class="stat-pill"><div class="stat-dot" style="background:${colors[c]}"></div><strong>${n}</strong> ${labels[c]}</div>` : '';
-        }).join('');
-    } else {
-        statsEl.style.display = 'none';
-    }
+if (allFiles.length > 0 && window.isAdmin) {
+    statsEl.style.display = 'flex';
+    const cats = ['pdf','video','image','audio','doc','other'];
+    const labels = { pdf:'PDF', video:'Vidéos', image:'Images', audio:'Audio', doc:'Docs', other:'Autres' };
+    const colors = { pdf:'#FF6B35', video:'#2EC4B6', image:'#F7C948', audio:'#9B5DE5', doc:'#60A5FA', other:'#6B7280' };
+    const icons = {
+        pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`,
+        video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>`,
+        image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
+        audio: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>`,
+        doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`,
+        other: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`,
+    };
+    statsEl.innerHTML = cats.map(c => {
+        const n = allFiles.filter(f => f.category === c).length;
+        if (!n) return '';
+        return `
+        <div onclick="setFilter('${c}', document.querySelector('[data-filter=${c}]'))" style="
+            display:flex; align-items:center; gap:10px;
+            background: linear-gradient(135deg, rgba(${c==='pdf'?'255,107,53':c==='video'?'46,196,182':c==='image'?'247,201,72':c==='audio'?'155,93,229':c==='doc'?'96,165,250':'107,114,128'},0.08) 0%, rgba(13,13,13,0) 100%);
+            border: 1px solid ${colors[c]}25;
+            border-radius: 14px; padding: 14px 18px;
+            cursor: pointer; transition: all 0.2s; position:relative; overflow:hidden;
+            min-width: 120px;
+        "
+        onmouseover="this.style.borderColor='${colors[c]}60'; this.style.boxShadow='0 0 20px ${colors[c]}30, 0 4px 20px rgba(0,0,0,0.3)'; this.style.transform='translateY(-2px)';"
+        onmouseout="this.style.borderColor='${colors[c]}25'; this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+            <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, transparent, ${colors[c]}, transparent); opacity:0.6;"></div>
+            <div style="width:36px;height:36px;border-radius:10px;background:${colors[c]}18;display:flex;align-items:center;justify-content:center;color:${colors[c]};flex-shrink:0;box-shadow:0 0 10px ${colors[c]}20;">
+                ${icons[c]}
+            </div>
+            <div>
+                <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#F0EDE6;line-height:1;">${n}</div>
+                <div style="font-size:11px;color:rgba(240,237,230,0.45);margin-top:2px;letter-spacing:0.5px;">${labels[c]}</div>
+            </div>
+        </div>`;
+    }).join('');
+    statsEl.style.flexWrap = 'wrap';
+    statsEl.style.gap = '10px';
+}
     if (!folders.length && !files.length) {
         area.innerHTML = `<div class="empty-state"><p>Aucun fichier ici. Glissez-déposez pour commencer !</p></div>`;
         return;
