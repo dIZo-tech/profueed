@@ -430,10 +430,8 @@
 <body>
 
 <div id="authOverlay" style="display:flex; position:fixed; inset:0; background:#0D0D0D; align-items:center; justify-content:center; z-index:9999;">
-  <div style="background:#161616; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:40px; width:100%; max-width:400px; text-align:center;">
+<div style="background:#161616; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:40px; width:100%; max-width:400px; text-align:center; max-height:90vh; overflow-y:auto;">
     <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:6px;">Study<span style="color:#F7C948">Drive</span></div>
-    <div style="font-size:12px; color:rgba(240,237,230,0.45); margin-bottom:32px; letter-spacing:1px; text-transform:uppercase;">Accès restreint</div>
-
     <!-- Formulaire connexion -->
     <div id="loginForm">
       <input id="authEmail" type="email" placeholder="Email" style="width:100%; padding:12px 16px; background:#1E1E1E; border:1px solid rgba(255,255,255,0.07); border-radius:10px; color:#F0EDE6; font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:10px;"/>
@@ -453,12 +451,13 @@
 
     <!-- Formulaire inscription -->
 <div id="registerForm" style="display:none;">
-  <div style="position:relative; overflow:hidden; margin:-40px -40px 28px -40px; padding:28px 40px; background:linear-gradient(135deg, #1a0000 0%, #2d0000 50%, #0d0000 100%); border-bottom:1px solid rgba(180,0,0,0.3);">
+<div style="position:relative; overflow:hidden; margin:-40px -40px 28px -40px; padding:28px 40px; background:linear-gradient(135deg, #1a0000 0%, #2d0000 50%, #0d0000 100%); border-bottom:1px solid rgba(180,0,0,0.3);">
     <div style="position:absolute; inset:0; background:radial-gradient(ellipse at 30% 50%, rgba(180,0,0,0.15) 0%, transparent 70%);"></div>
-    <div style="font-family:'Syne',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(180,0,0,0.7); margin-bottom:8px;">Accès limité</div>
-    <div style="font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:#F0EDE6; line-height:1.5; position:relative;">S/o le new ! Comment ça va ?<br><span style="color:rgba(220,60,60,0.9);">Bienvenue.</span> On sait pourquoi t'es là.<br>On est là aussi.</div>
+    <div style="font-family:'Syne',sans-serif; font-size:20px; font-weight:800; margin-bottom:6px; position:relative;">Study<span style="color:#CC0000">Drive</span></div>
+    <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(180,0,0,0.7); margin-bottom:8px;">Accès limité</div>
+    <div style="font-family:'Syne',sans-serif; font-size:14px; font-weight:600; color:#F0EDE6; line-height:1.6; position:relative;">S/o le new ! Comment ça va ?<br><span style="color:rgba(220,60,60,0.9);">Bienvenue.</span> On sait pourquoi t'es là.<br>On est là aussi.</div>
     <div style="position:absolute; bottom:-1px; right:20px; width:60px; height:2px; background:linear-gradient(90deg, transparent, #CC0000);"></div>
-  </div>
+</div>
 
   <!-- Étape 1 -->
   <div id="step1">
@@ -549,14 +548,17 @@
   </div>
 
   <!-- Confirmation -->
-  <div id="stepDone" style="display:none; text-align:center; padding:20px 0;">
+<div id="stepDone" style="display:none; text-align:center; padding:20px 0;">
     <div style="font-size:36px; margin-bottom:16px;">🩸</div>
     <div style="font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:10px; color:#F0EDE6;">T'es dans la liste.</div>
-    <div style="font-size:13px; color:rgba(240,237,230,0.5); line-height:1.8;">Un email de confirmation t'a été envoyé.<br>Ton accès sera validé manuellement.<br><span style="color:rgba(200,0,0,0.6);">Patience.</span></div>
-  </div>
+    <div style="font-size:13px; color:rgba(240,237,230,0.5); line-height:1.8; margin-bottom:16px;">Un email de confirmation t'a été envoyé.<br>Ton accès sera validé manuellement.<br><span style="color:rgba(200,0,0,0.6);">Patience.</span></div>
+    <div style="background:rgba(180,0,0,0.1); border:1px solid rgba(180,0,0,0.25); border-radius:10px; padding:14px; font-size:12px; color:rgba(240,237,230,0.6); line-height:1.7; text-align:left;">
+        ⚠️ Toute fausse information détectée entraîne un <strong style="color:#CC0000">ban définitif</strong> sans appel. Plus aucun accès au site.
+    </div>
+</div>
 
   <div style="margin-top:16px; border-top:1px solid rgba(180,0,0,0.15); padding-top:14px;">
-    <button onclick="showRegister()" type="button" style="width:100%; padding:10px; background:transparent; color:rgba(200,60,60,0.5); border:1px solid rgba(180,0,0,0.15); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour connexion</button>
+<button onclick="document.getElementById('registerForm').style.display='none'; document.getElementById('loginForm').style.display='block';" type="button" style="width:100%; padding:10px; background:transparent; color:rgba(200,60,60,0.5); border:1px solid rgba(180,0,0,0.15); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer;">← Retour connexion</button>
   </div>
 </div>
 
@@ -1354,8 +1356,15 @@ function goStep2() {
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
     const err = document.getElementById('step1Error');
-    if (!email || !password) { err.textContent = 'Remplis tous les champs !'; return; }
-    if (password.length < 6) { err.textContent = 'Mot de passe trop court (6 min)'; return; }
+    
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) { 
+        err.textContent = 'Entre un email valide !'; return; 
+    }
+    if (!password || password.length < 6) { 
+        err.textContent = 'Mot de passe trop court (6 min)'; return; 
+    }
     err.textContent = '';
     document.getElementById('step1').style.display = 'none';
     document.getElementById('step2').style.display = 'block';
@@ -1367,14 +1376,20 @@ function goStep3() {
     const dob = document.getElementById('regDob').value;
     const sexe = document.getElementById('regSexe').value;
     const err = document.getElementById('step2Error');
+    
     if (!prenom || !nom || !dob || !sexe) { err.textContent = 'Remplis tous les champs !'; return; }
+    
+    const age = Math.floor((new Date() - new Date(dob)) / (365.25 * 24 * 60 * 60 * 1000));
+    if (age < 13) { err.textContent = 'Tu dois avoir au moins 13 ans.'; return; }
+    if (age > 20) { err.textContent = 'Ce site est réservé aux 13-20 ans.'; return; }
+    
     err.textContent = '';
     document.getElementById('step2').style.display = 'none';
     document.getElementById('step3').style.display = 'block';
     document.getElementById('regMessage').addEventListener('input', () => {
         const words = document.getElementById('regMessage').value.trim().split(/\s+/).filter(w => w).length;
         document.getElementById('wordCount').textContent = `${words} / 20 mots`;
-        document.getElementById('wordCount').style.color = words >= 20 ? '#2EC4B6' : 'rgba(240,237,230,0.35)';
+        document.getElementById('wordCount').style.color = words >= 20 ? '#CC0000' : 'rgba(200,0,0,0.4)';
     });
 }
 
