@@ -1227,7 +1227,7 @@ function render() {
     const area = document.getElementById('fileArea');
     const statsEl = document.getElementById('statsBar');
 area.innerHTML = '';
-if (!window.isAdmin) renderGuestHeader();
+if (!window.isAdmin && !document.getElementById('guestHeader')) renderGuestHeader();
     const files = getVisibleFiles();
     const folders = getSubfolders();
     if (allFiles.length > 0 && window.isAdmin) {
