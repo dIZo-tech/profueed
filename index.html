@@ -1226,8 +1226,8 @@ function renderGuestHeader() {
 function render() {
     const area = document.getElementById('fileArea');
     const statsEl = document.getElementById('statsBar');
-    area.innerHTML = '';
-    renderGuestHeader();
+area.innerHTML = '';
+if (!window.isAdmin) renderGuestHeader();
     const files = getVisibleFiles();
     const folders = getSubfolders();
     if (allFiles.length > 0 && window.isAdmin) {
