@@ -425,6 +425,83 @@
     .content { padding: 16px; }
     .topbar { padding: 10px 16px; }
   }
+/* ─── Glow effects globaux ─── */
+button, .btn-upload, .action-btn, .nav-item, .file-card, .file-row, .stat-pill {
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Boutons upload */
+.btn-upload:hover {
+  box-shadow: 0 0 20px rgba(247,201,72,0.4), 0 0 40px rgba(247,201,72,0.15) !important;
+  transform: translateY(-1px);
+}
+
+/* Boutons action (télécharger, supprimer) */
+.action-btn:hover {
+  box-shadow: 0 0 10px rgba(247,201,72,0.2);
+}
+
+/* Nav items sidebar */
+.nav-item:hover {
+  box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(247,201,72,0.08);
+}
+.nav-item.active {
+  box-shadow: inset 3px 0 0 var(--accent), 0 0 16px rgba(247,201,72,0.1);
+}
+
+/* Barre de stockage néon */
+.storage-fill {
+  box-shadow: 0 0 8px rgba(46,196,182,0.6), 0 0 16px rgba(247,201,72,0.3);
+}
+
+/* Badges nav actifs */
+.nav-item.active .nav-badge {
+  box-shadow: 0 0 8px rgba(247,201,72,0.5);
+}
+
+/* Breadcrumb hover */
+.breadcrumb-item:hover {
+  text-shadow: 0 0 8px rgba(247,201,72,0.6);
+}
+
+/* Search focus néon */
+#searchInput:focus {
+  box-shadow: 0 0 0 3px rgba(247,201,72,0.08), 0 0 20px rgba(247,201,72,0.1) !important;
+}
+
+/* View buttons */
+.view-btn.active {
+  box-shadow: 0 0 10px rgba(247,201,72,0.3);
+}
+
+/* Stat pills */
+.stat-pill:hover {
+  box-shadow: 0 0 14px rgba(247,201,72,0.15);
+  border-color: rgba(247,201,72,0.2);
+}
+
+/* Bouton déconnexion */
+button[onclick="handleLogout()"]:hover {
+  border-color: rgba(255,107,53,0.4) !important;
+  color: var(--pdf) !important;
+  box-shadow: 0 0 14px rgba(255,107,53,0.2);
+}
+
+/* Progress bar néon */
+#uploadProgress {
+  box-shadow: 0 0 10px rgba(46,196,182,0.8), 0 0 20px rgba(247,201,72,0.4);
+}
+
+/* Section titles néon subtil */
+.section-title-text {
+  text-shadow: 0 0 20px rgba(247,201,72,0.15);
+}
+
+/* Logo néon */
+.logo-text span {
+  text-shadow: 0 0 12px rgba(247,201,72,0.5);
+}
+
 </style>
 </head>
 <body>
