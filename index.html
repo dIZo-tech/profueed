@@ -1179,7 +1179,7 @@ function renderGuestHeader() {
                     <input 
                         type="text" 
                         placeholder="Recherche un cours, une vidéo, un chapitre..." 
-                        oninput="onSearch(this.value)"
+                        oninput="document.getElementById('searchInput').value=this.value; onSearch(this.value);"
                         style="
                             width:100%; padding:14px 18px 14px 42px;
                             background:rgba(255,255,255,0.04);
@@ -1455,6 +1455,10 @@ async function init() {
         document.getElementById('authOverlay').style.display = 'none';
         document.getElementById('appWrapper').style.display = 'block';
 
+        if (!window.isAdmin) {
+            document.querySelector('.search-wrap').style.display = 'none';
+        }
+
         const dropZone = document.getElementById('dropZone');
         if (dropZone) {
             dropZone.style.setProperty('display', window.isAdmin ? 'block' : 'none', 'important');
@@ -1473,25 +1477,6 @@ async function init() {
     }
 }
 init();
-/* ─── GESTION DE L'INTERFACE ADMIN ─── */
-
-// 3. Gère la connexion avec Supabase
-async function handleLogin() {
-    const email = document.getElementById('authEmail').value;
-    const password = document.getElementById('authPwd').value;
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-        const msgs = [
-            "Aïe aïe aïe... c'est pas ça 😬",
-            "Raté ! T'as oublié ton mot de passe ou quoi ? 💀",
-            "Nope. Essaie encore champion 🏆",
-            "Accès refusé. Le drive te regarde bizarrement 👀",
-        ];
-        const el = document.getElementById('authError');
-        el.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-        el.style.display = 'block';
-    } else {
-        init();
     }
 }
 
