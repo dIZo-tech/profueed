@@ -1025,8 +1025,6 @@ async function deleteFolder(folderPath, e) {
 }
 
 async function downloadFolder(folderPath, folderName) {
-    toast("Préparation du zip...", "success");
-    
     const filesToZip = allFiles.filter(f => 
         f.path === folderPath || f.path.startsWith(folderPath + '/')
     );
@@ -1036,13 +1034,43 @@ async function downloadFolder(folderPath, folderName) {
         return;
     }
 
-    const zip = new JSZip();
+    // Barre de progression custom
+    let progressBar = document.getElementById('zipProgress');
+    if (!progressBar) {
+        progressBar = document.createElement('div');
+        progressBar.id = 'zipProgress';
+        progressBar.style.cssText = `
+            position:fixed; bottom:70px; right:24px; z-index:3000;
+            background:#161616; border:1px solid rgba(247,201,72,0.3);
+            border-radius:12px; padding:14px 18px; min-width:260px;
+            box-shadow:0 0 20px rgba(247,201,72,0.1);
+        `;
+        document.body.appendChild(progressBar);
+    }
 
-    for (const file of filesToZip) {
+    const zip = new JSZip();
+    const total = filesToZip.length;
+
+    for (let idx = 0; idx < total; idx++) {
+        const file = filesToZip[idx];
+        const pct = Math.round(((idx) / total) * 100);
+        
+        progressBar.innerHTML = `
+            <div style="font-family:'DM Sans',sans-serif; font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">
+                📦 Préparation du zip... ${pct}%
+            </div>
+            <div style="font-size:11px; color:rgba(240,237,230,0.35); margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${file.name}
+            </div>
+            <div style="height:3px; background:#1E1E1E; border-radius:99px; overflow:hidden;">
+                <div style="height:100%; width:${pct}%; background:linear-gradient(90deg, #2EC4B6, #F7C948); border-radius:99px; transition:width 0.3s;"></div>
+            </div>
+            <div style="font-size:10px; color:rgba(240,237,230,0.3); margin-top:6px;">${idx}/${total} fichiers</div>
+        `;
+
         try {
             const response = await fetch(file.url);
             const blob = await response.blob();
-            // Chemin relatif dans le zip
             const relativePath = file.path.startsWith(folderPath)
                 ? file.path.slice(folderPath.length + 1) + '/' + file.name
                 : file.name;
@@ -1052,13 +1080,38 @@ async function downloadFolder(folderPath, folderName) {
         }
     }
 
-    const content = await zip.generateAsync({ type: "blob" });
+    progressBar.innerHTML = `
+        <div style="font-family:'DM Sans',sans-serif; font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">
+            ⚡ Génération du zip...
+        </div>
+        <div style="height:3px; background:#1E1E1E; border-radius:99px; overflow:hidden;">
+            <div style="height:100%; width:100%; background:linear-gradient(90deg, #2EC4B6, #F7C948); border-radius:99px;"></div>
+        </div>
+    `;
+
+    const content = await zip.generateAsync({ type: "blob" }, (metadata) => {
+        progressBar.innerHTML = `
+            <div style="font-family:'DM Sans',sans-serif; font-size:12px; color:rgba(240,237,230,0.6); margin-bottom:8px;">
+                ⚡ Compression... ${Math.round(metadata.percent)}%
+            </div>
+            <div style="height:3px; background:#1E1E1E; border-radius:99px; overflow:hidden;">
+                <div style="height:100%; width:${Math.round(metadata.percent)}%; background:linear-gradient(90deg, #2EC4B6, #F7C948); border-radius:99px;"></div>
+            </div>
+        `;
+    });
+
     const a = document.createElement('a');
     a.href = URL.createObjectURL(content);
     a.download = folderName + '.zip';
     a.click();
     URL.revokeObjectURL(a.href);
-    toast("Téléchargement lancé !", "success");
+
+    progressBar.innerHTML = `
+        <div style="font-family:'DM Sans',sans-serif; font-size:12px; color:#2EC4B6;">
+            ✅ Téléchargement lancé !
+        </div>
+    `;
+    setTimeout(() => progressBar.remove(), 3000);
 }
 
 function downloadFile(file, e) {
