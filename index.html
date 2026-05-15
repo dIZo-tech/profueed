@@ -1572,7 +1572,15 @@ async function init() {
                 return;
             }
 
-            window.userPrenom = profile?.prenom || 'toi';
+            const pending = localStorage.getItem('pendingProfile');
+            if (pending && !profile?.prenom) {
+                const infos = JSON.parse(pending);
+                await supabaseClient.from('profiles').update(infos).eq('id', session.user.id);
+                localStorage.removeItem('pendingProfile');
+                window.userPrenom = infos.prenom || 'toi';
+            } else {
+                window.userPrenom = profile?.prenom || 'toi';
+            }
         } else {
             window.userPrenom = 'Admin';
         }
@@ -1602,7 +1610,6 @@ async function init() {
     }
 }
 init();
-
 async function handleLogin() {
     const email = document.getElementById('authEmail').value;
     const password = document.getElementById('authPwd').value;
@@ -1719,17 +1726,17 @@ async function handleRegister() {
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { err.textContent = 'Erreur : ' + error.message; return; }
 
-await supabaseClient.from('profiles').update({
-    prenom,
-    nom,
-    date_naissance: dob,
-    sexe,
-    classe: regData.classe,
-    niveau: regData.niveau,
-    comment_connu: regData.comment,
-    objectif: regData.objectif,
-    message,
-}).eq('id', data.user.id);
+    localStorage.setItem('pendingProfile', JSON.stringify({
+        prenom,
+        nom,
+        date_naissance: dob,
+        sexe,
+        classe: regData.classe,
+        niveau: regData.niveau,
+        comment_connu: regData.comment,
+        objectif: regData.objectif,
+        message,
+    }));
 
     document.getElementById('step3').style.display = 'none';
     document.getElementById('stepDone').style.display = 'block';
