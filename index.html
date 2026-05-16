@@ -1732,7 +1732,21 @@ async function handleRegister() {
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { err.textContent = 'Erreur : ' + error.message; return; }
 
-    await new Promise(r => setTimeout(r, 2000));
+    // Attendre que le trigger crée la ligne dans profiles
+    let profile = null;
+    for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 1000));
+        const { data: p } = await supabaseClient
+            .from('profiles')
+            .select('id')
+            .eq('id', data.user.id)
+            .single();
+        if (p) { profile = p; break; }
+    }
+
+    if (!profile) {
+        err.textContent = 'Erreur technique, réessaie.'; return;
+    }
 
     await supabaseClient.from('profiles').update({
         prenom, nom,
@@ -1746,11 +1760,7 @@ async function handleRegister() {
     }).eq('id', data.user.id);
 
     await emailjs.send('service_dv5477w', 'template_zdlbkl8', {
-        prenom,
-        nom,
-        email,
-        dob,
-        sexe,
+        prenom, nom, email, dob, sexe,
         classe: regData.classe,
         niveau: regData.niveau,
         comment: regData.comment,
