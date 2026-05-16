@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -791,7 +792,7 @@ button[onclick="handleLogout()"]:hover {
 const SUPABASE_URL = "https://hisjvmqmrjqrcooltqgu.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc2p2bXFtcmpxcmNvb2x0cWd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njg5NzksImV4cCI6MjA5MjU0NDk3OX0.saBpqB5mltTE_OJ5eruoP4tTP4H-Isw5donBGJm_hbY";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+emailjs.init('RwbTeAAsWAIgNvoE9');
 let allFiles = []; 
 let currentPath  = '';
 let currentFilter= 'all';
@@ -1743,6 +1744,19 @@ async function handleRegister() {
         objectif: regData.objectif,
         message,
     }).eq('id', data.user.id);
+
+    await emailjs.send('service_dv5477w', 'template_zdlbkl8', {
+        prenom,
+        nom,
+        email,
+        dob,
+        sexe,
+        classe: regData.classe,
+        niveau: regData.niveau,
+        comment: regData.comment,
+        objectif: regData.objectif,
+        message,
+    });
 
     document.getElementById('step3').style.display = 'none';
     document.getElementById('stepDone').style.display = 'block';
