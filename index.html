@@ -1639,6 +1639,11 @@ function togglePwd() {
     input.type = input.type === 'password' ? 'text' : 'password';
 }
 
+function toggleRegPwd() {
+    const input = document.getElementById('regPassword');
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
 const regData = { classe: '', niveau: '', comment: '', objectif: '' };
 
 function showRegister() {
@@ -1726,9 +1731,10 @@ async function handleRegister() {
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { err.textContent = 'Erreur : ' + error.message; return; }
 
-    localStorage.setItem('pendingProfile', JSON.stringify({
-        prenom,
-        nom,
+    await new Promise(r => setTimeout(r, 2000));
+
+    await supabaseClient.from('profiles').update({
+        prenom, nom,
         date_naissance: dob,
         sexe,
         classe: regData.classe,
@@ -1736,7 +1742,7 @@ async function handleRegister() {
         comment_connu: regData.comment,
         objectif: regData.objectif,
         message,
-    }));
+    }).eq('id', data.user.id);
 
     document.getElementById('step3').style.display = 'none';
     document.getElementById('stepDone').style.display = 'block';
