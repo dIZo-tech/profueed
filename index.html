@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -1558,10 +1559,8 @@ async function init() {
             document.getElementById('authOverlay').style.display = 'flex';
             return;
         }
-
         const myAdminUuid = '1382047a-d536-448f-b51c-c6d87401b708';
         window.isAdmin = session?.user?.id === myAdminUuid;
-
         if (!window.isAdmin) {
             const { data: profile } = await supabaseClient
                 .from('profiles')
@@ -1577,7 +1576,6 @@ async function init() {
                 await supabaseClient.auth.signOut();
                 return;
             }
-
             const pending = localStorage.getItem('pendingProfile');
             if (pending && !profile?.prenom) {
                 const infos = JSON.parse(pending);
@@ -1590,19 +1588,15 @@ async function init() {
         } else {
             window.userPrenom = 'Admin';
         }
-
         document.getElementById('authOverlay').style.display = 'none';
         document.getElementById('appWrapper').style.display = 'block';
-
         if (!window.isAdmin) {
             document.querySelector('.search-wrap').style.display = 'none';
         }
-
         const dropZone = document.getElementById('dropZone');
         if (dropZone) {
             dropZone.style.setProperty('display', window.isAdmin ? 'block' : 'none', 'important');
         }
-
         const { data, error } = await supabaseClient.from('Documents').select('*').order('created_at', { ascending: false });
         if (error) throw error;
         allFiles = data || [];
@@ -1616,6 +1610,10 @@ async function init() {
     }
 }
 init();
+const authDiv = document.querySelector('#authOverlay > div');
+const lenis = new Lenis({ wrapper: authDiv, content: authDiv, smoothWheel: true, lerp: 0.08 });
+function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+requestAnimationFrame(raf);
 async function handleLogin() {
     const email = document.getElementById('authEmail').value;
     const password = document.getElementById('authPwd').value;
@@ -1634,12 +1632,10 @@ async function handleLogin() {
         init();
     }
 }
-
 async function handleLogout() {
     await supabaseClient.auth.signOut();
     location.reload();
 }
-
 function togglePwd() {
     const input = document.getElementById('authPwd');
     input.type = input.type === 'password' ? 'text' : 'password';
