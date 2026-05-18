@@ -509,12 +509,18 @@ button[onclick="handleLogout()"]:hover {
   text-shadow: 0 0 12px rgba(247,201,72,0.5);
 }
 
+/* Auth modal scrollbar */
+#authOverlay > div::-webkit-scrollbar { width: 4px; }
+#authOverlay > div::-webkit-scrollbar-track { background: transparent; }
+#authOverlay > div::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+#authOverlay > div::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
 </style>
 </head>
 <body>
 
 <div id="authOverlay" style="display:flex; position:fixed; inset:0; background:#0D0D0D; align-items:center; justify-content:center; z-index:9999;">
-<div style="background:#161616; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:40px; width:100%; max-width:400px; text-align:center; max-height:90vh; overflow-y:auto;">
+<div style="background:#161616; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:40px; width:100%; max-width:400px; text-align:center; max-height:90vh; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.08) transparent;">
     <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:6px;">Study<span style="color:#F7C948">Drive</span></div>
     <!-- Formulaire connexion -->
     <div id="loginForm">
@@ -535,11 +541,10 @@ button[onclick="handleLogout()"]:hover {
 
     <!-- Formulaire inscription -->
 <div id="registerForm" style="display:none;">
-<div style="position:relative; overflow:hidden; margin:-40px -40px 28px -40px; padding:28px 40px; background:linear-gradient(135deg, #1a0000 0%, #2d0000 50%, #0d0000 100%); border-bottom:1px solid rgba(180,0,0,0.3);">
+<div style="position:relative; overflow:hidden; margin:-40px -40px 28px -40px; padding:24px 40px; background:linear-gradient(135deg, #1a0000 0%, #2d0000 50%, #0d0000 100%); border-bottom:1px solid rgba(180,0,0,0.3);">
     <div style="position:absolute; inset:0; background:radial-gradient(ellipse at 30% 50%, rgba(180,0,0,0.15) 0%, transparent 70%);"></div>
     <div style="font-family:'Syne',sans-serif; font-size:20px; font-weight:800; margin-bottom:6px; position:relative;">Study<span style="color:#CC0000">Drive</span></div>
-    <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(180,0,0,0.7); margin-bottom:8px;">Accès limité</div>
-    <div style="font-family:'Syne',sans-serif; font-size:14px; font-weight:600; color:#F0EDE6; line-height:1.6; position:relative;">S/o le new ! Comment ça va ?<br><span style="color:rgba(220,60,60,0.9);">Bienvenue.</span> On sait pourquoi t'es là.<br>On est là aussi.</div>
+    <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(180,0,0,0.7); margin-bottom:0; position:relative;">Accès limité</div>
     <div style="position:absolute; bottom:-1px; right:20px; width:60px; height:2px; background:linear-gradient(90deg, transparent, #CC0000);"></div>
 </div>
 
